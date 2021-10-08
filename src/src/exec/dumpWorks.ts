@@ -19,6 +19,9 @@ export const start = async () => {
                 }
             }
 
+            // делаем зип архив
+            zip(BACKUP_PATH, 'backup')
+
             resolve(null)
         }
         catch (error) {
@@ -41,5 +44,22 @@ const mongoExport = async (dbName: string, collection: string) => {
             console.error(error)
             reject(error)
         }
+    })
+}
+
+const zip = async (folderToZip: string, outName: string) => {
+    return await new Promise(function (resolve, reject) {
+        try {
+            const commandMongoExport = `zip -r ${outName}.zip ${folderToZip}`
+            child.exec(commandMongoExport, (error: child.ExecException | null, stdout: string, stderr: string) => {
+                console.log(stdout)
+                resolve(null)
+            })
+        }
+        catch (error) {
+            console.error(error)
+            reject(error)
+        }
+
     })
 }

@@ -19,8 +19,7 @@ const init = async () => {
 }
 
 const runProcess = async () => {
-    // TODO: запускатькаждые 6 часов (например)
-
+    // TODO: запускать каждые 6 часов (например)
     await dumpWorks.start()
 }
 

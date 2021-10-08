@@ -1,23 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -58,58 +39,52 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-require('./src/utils/colorsLog');
-var dumpWorks = __importStar(require("./src/exec/dumpWorks"));
-var telegram = __importStar(require("./src/telegram/telegram"));
-var utils_1 = require("./src/utils/utils");
+exports.logFile = exports.logText = exports.init = void 0;
+var node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
+var env_config_1 = __importDefault(require("../configs/env.config"));
+var bot = new node_telegram_bot_api_1.default(env_config_1.default.TELEGRAM_BOT_TOKEN, { polling: true });
 var init = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_1;
+    var botMe;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, telegram.init()];
+                bot.on("message", onMessage);
+                return [4 /*yield*/, bot.getMe()];
             case 1:
-                _a.sent();
-                console.log("\u2705\u2705\u2705 Initialization COMPLETE!".green());
-                runProcess();
-                return [3 /*break*/, 3];
-            case 2:
-                err_1 = _a.sent();
-                console.log("\u274C\u274C\u274C Initialization FAILED!".red());
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                botMe = _a.sent();
+                console.log("\u2705 Telegram bot @" + botMe.username + " initialized!");
+                return [2 /*return*/];
         }
     });
 }); };
-var runProcess = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var delayTimeHours, delayTime, dumpLog;
+exports.init = init;
+var onMessage = function (msg) {
+};
+var logText = function (text) { return __awaiter(void 0, void 0, void 0, function () {
+    var options;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                delayTimeHours = 6 // каждые n часов
-                ;
-                delayTime = delayTimeHours * (60 * (60 * 1000));
-                _a.label = 1;
+                options = {
+                    parse_mode: "HTML",
+                };
+                return [4 /*yield*/, bot.sendMessage(env_config_1.default.TELEGRAM_CHAT_TO_LOG, text, options)];
             case 1:
-                if (!true) return [3 /*break*/, 6];
-                return [4 /*yield*/, dumpWorks.start()];
-            case 2:
-                dumpLog = _a.sent();
-                return [4 /*yield*/, telegram.logText("<pre>" + dumpLog.log + "</pre>")];
-            case 3:
                 _a.sent();
-                return [4 /*yield*/, telegram.logFile(dumpLog.archivePath)];
-            case 4:
-                _a.sent();
-                return [4 /*yield*/, (0, utils_1.delay)(delayTime)];
-            case 5:
-                _a.sent();
-                return [3 /*break*/, 1];
-            case 6: return [2 /*return*/];
+                return [2 /*return*/];
         }
     });
 }); };
-init();
+exports.logText = logText;
+var logFile = function (path) { return __awaiter(void 0, void 0, void 0, function () {
+    var fileOptions;
+    return __generator(this, function (_a) {
+        fileOptions = {
+            filename: 'mongoexport.zip',
+            contentType: 'application/octet-stream',
+        };
+        bot.sendDocument(env_config_1.default.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions);
+        return [2 /*return*/];
+    });
+}); };
+exports.logFile = logFile;

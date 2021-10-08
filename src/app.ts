@@ -5,12 +5,14 @@ require('./src/utils/colorsLog')
 import * as colorsLog from './src/utils/colorsLog'
 
 import * as dumpWorks from './src/exec/dumpWorks'
+import * as telegram from './src/telegram/telegram'
+import { delay } from './src/utils/utils'
 
 const init = async () => {
     try {
+        await telegram.init()
+
         console.log(`✅✅✅ Initialization COMPLETE!`.green())
-
-
         runProcess()
     }
     catch (err) {
@@ -19,8 +21,14 @@ const init = async () => {
 }
 
 const runProcess = async () => {
-    // TODO: запускать каждые 6 часов (например)
-    await dumpWorks.start()
+    const delayTimeHours = 6 // каждые n часов
+    const delayTime = delayTimeHours * (60 * (60 * 1000)) 
+    while (true) {
+        const dumpLog = await dumpWorks.start()
+        await telegram.logText(`<pre>${dumpLog.log}</pre>`)
+        await telegram.logFile(dumpLog.archivePath)
+        await delay(delayTime)
+    }
 }
 
 init()

@@ -60,18 +60,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.start = void 0;
 var child = __importStar(require("child_process"));
+var fs = __importStar(require("fs"));
 var db_config_1 = __importDefault(require("../configs/db.config"));
 var BACKUP_PATH = 'backup';
+/**
+ *
+ * @returns Collections export log
+ */
 var start = function () { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var i, db, j, collection, error_1;
+                        var result, i, db, j, collection, collectionPath, archivePath, error_1;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 7, , 8]);
+                                    _a.trys.push([0, 8, , 9]);
+                                    result = {
+                                        log: '',
+                                        archivePath: ''
+                                    };
                                     // удаляем предыдущий backup
                                     child.exec("rm -r " + BACKUP_PATH);
                                     i = 0;
@@ -84,10 +93,13 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 case 2:
                                     if (!(j < db.collections.length)) return [3 /*break*/, 5];
                                     collection = db.collections[j];
-                                    console.log("\u0414\u0430\u043C\u043F " + db.name + " " + collection);
-                                    return [4 /*yield*/, mongoExport(db.name, collection)];
+                                    return [4 /*yield*/, mongoExport(db.name, collection)
+                                        // узнать размер коллекции
+                                    ];
                                 case 3:
-                                    _a.sent();
+                                    collectionPath = _a.sent();
+                                    // узнать размер коллекции
+                                    result.log += collectionPath + " " + getFileSizeMb(collectionPath) + "mb\n";
                                     _a.label = 4;
                                 case 4:
                                     j++;
@@ -95,17 +107,20 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 case 5:
                                     i++;
                                     return [3 /*break*/, 1];
-                                case 6:
-                                    // делаем зип архив
-                                    zip(BACKUP_PATH, 'backup');
-                                    resolve(null);
-                                    return [3 /*break*/, 8];
+                                case 6: return [4 /*yield*/, zip(BACKUP_PATH, 'backup')];
                                 case 7:
+                                    archivePath = _a.sent();
+                                    result.log += "\nZip archive ~ " + getFileSizeMb(BACKUP_PATH + ".zip") + "mb";
+                                    result.archivePath = archivePath;
+                                    resolve(result);
+                                    console.log(result.log);
+                                    return [3 /*break*/, 9];
+                                case 8:
                                     error_1 = _a.sent();
                                     console.error(error_1);
                                     reject(error_1);
-                                    return [3 /*break*/, 8];
-                                case 8: return [2 /*return*/];
+                                    return [3 /*break*/, 9];
+                                case 9: return [2 /*return*/];
                             }
                         });
                     });
@@ -122,9 +137,10 @@ var mongoExport = function (dbName, collection) { return __awaiter(void 0, void 
         switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     try {
-                        var commandMongoExport = "mongoexport --db " + dbName + " -c " + collection + " --out " + BACKUP_PATH + "/" + dbName + "/" + collection + ".json";
+                        var collectionPath_1 = BACKUP_PATH + "/" + dbName + "/" + collection + ".json";
+                        var commandMongoExport = "mongoexport --db " + dbName + " -c " + collection + " --out " + collectionPath_1;
                         var foo = child.exec(commandMongoExport, function (error, stdout, stderr) {
-                            resolve(null);
+                            resolve(collectionPath_1);
                         });
                     }
                     catch (error) {
@@ -136,15 +152,22 @@ var mongoExport = function (dbName, collection) { return __awaiter(void 0, void 
         }
     });
 }); };
+/**
+ *
+ * @param folderToZip
+ * @param outName
+ * @returns archive path
+ */
 var zip = function (folderToZip, outName) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     try {
-                        var commandMongoExport = "zip -r " + outName + ".zip " + folderToZip;
+                        var archivePath_1 = outName + ".zip";
+                        var commandMongoExport = "zip -r " + archivePath_1 + " " + folderToZip;
                         child.exec(commandMongoExport, function (error, stdout, stderr) {
                             console.log(stdout);
-                            resolve(null);
+                            resolve(archivePath_1);
                         });
                     }
                     catch (error) {
@@ -156,3 +179,9 @@ var zip = function (folderToZip, outName) { return __awaiter(void 0, void 0, voi
         }
     });
 }); };
+var getFileSizeMb = function (path) {
+    var stats = fs.statSync(path);
+    var fileSizeInBytes = stats.size;
+    var mb = fileSizeInBytes / (1024 * 1024);
+    return mb.toFixed(2);
+};

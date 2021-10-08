@@ -1,0 +1,9 @@
+/template
+/backup
+/node_modules
+/.vscode
+*.log
+.env
+*.DS_Store
+
+/src/src/configs/db.config.ts

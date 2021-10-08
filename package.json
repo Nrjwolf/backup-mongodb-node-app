@@ -1,0 +1,21 @@
+{
+  "name": "backup-db-app",
+  "version": "1.0.0",
+  "main": "app.js",
+  "author": "nrjwolf <nrjwolf@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.10.3",
+    "ts-node": "^10.2.1",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.4.2"
+  },
+  "scripts": {
+    "r": "node dist/app.js",
+    "start": "ts-node-dev --respawn src/app.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0"
+  }
+}

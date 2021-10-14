@@ -47,9 +47,7 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
     var botMe;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                bot.on("message", onMessage);
-                return [4 /*yield*/, bot.getMe()];
+            case 0: return [4 /*yield*/, bot.getMe()];
             case 1:
                 botMe = _a.sent();
                 console.log("\u2705 Telegram bot @" + botMe.username + " initialized!");
@@ -58,8 +56,6 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
     });
 }); };
 exports.init = init;
-var onMessage = function (msg) {
-};
 var logText = function (text) { return __awaiter(void 0, void 0, void 0, function () {
     var options;
     return __generator(this, function (_a) {

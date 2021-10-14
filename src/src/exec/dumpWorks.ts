@@ -31,13 +31,13 @@ export const start = async (): Promise<DumpResult> => {
                 const db = dbsResult.databases[i]
                 var collections = await mongClient.db(db.name).listCollections().toArray()
 
+                // get db size
                 for (let j = 0; j < collections.length; j++) {
                     const collection = collections[j]
-                    const collectionPath = await mongoExport(db.name, collection.name)
-
-                    // get collection size
-                    result.log += `${collectionPath.replace(`${BACKUP_PATH}/`, '')} ${getFileSizeMb(collectionPath)}mb\n`
+                    await mongoExport(db.name, collection.name)
                 }
+
+                result.log += `${db.name} ${getFileSizeMb(`${BACKUP_PATH}/${db.name}`)}mb\n`
             }
 
             // create zip archive

@@ -75,11 +75,11 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
         switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var result, dbsResult, i, db, collections, j, collection, collectionPath, archivePath, error_1;
+                        var result, dbsResult, i, db, collections, j, collection, archivePath, error_1;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 11, , 12]);
+                                    _a.trys.push([0, 12, , 13]);
                                     result = {
                                         log: '',
                                         archivePath: '',
@@ -95,9 +95,11 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                     i = 0;
                                     _a.label = 3;
                                 case 3:
-                                    if (!(i < dbsResult.databases.length)) return [3 /*break*/, 9];
+                                    if (!(i < dbsResult.databases.length)) return [3 /*break*/, 10];
                                     db = dbsResult.databases[i];
-                                    return [4 /*yield*/, mongClient.db(db.name).listCollections().toArray()];
+                                    return [4 /*yield*/, mongClient.db(db.name).listCollections().toArray()
+                                        // get db size
+                                    ];
                                 case 4:
                                     collections = _a.sent();
                                     j = 0;
@@ -105,34 +107,33 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 case 5:
                                     if (!(j < collections.length)) return [3 /*break*/, 8];
                                     collection = collections[j];
-                                    return [4 /*yield*/, mongoExport(db.name, collection.name)
-                                        // get collection size
-                                    ];
+                                    return [4 /*yield*/, mongoExport(db.name, collection.name)];
                                 case 6:
-                                    collectionPath = _a.sent();
-                                    // get collection size
-                                    result.log += collectionPath.replace(BACKUP_PATH + "/", '') + " " + getFileSizeMb(collectionPath) + "mb\n";
+                                    _a.sent();
                                     _a.label = 7;
                                 case 7:
                                     j++;
                                     return [3 /*break*/, 5];
                                 case 8:
+                                    result.log += db.name + " " + getFileSizeMb(BACKUP_PATH + "/" + db.name) + "mb\n";
+                                    _a.label = 9;
+                                case 9:
                                     i++;
                                     return [3 /*break*/, 3];
-                                case 9: return [4 /*yield*/, zip(BACKUP_PATH, 'backup')];
-                                case 10:
+                                case 10: return [4 /*yield*/, zip(BACKUP_PATH, 'backup')];
+                                case 11:
                                     archivePath = _a.sent();
                                     result.log += "\nZip archive ~ " + getFileSizeMb(BACKUP_PATH + ".zip") + "mb";
                                     result.archivePath = archivePath;
                                     resolve(result);
                                     console.log(result.log);
-                                    return [3 /*break*/, 12];
-                                case 11:
+                                    return [3 /*break*/, 13];
+                                case 12:
                                     error_1 = _a.sent();
                                     console.error(error_1);
                                     reject(error_1);
-                                    return [3 /*break*/, 12];
-                                case 12: return [2 /*return*/];
+                                    return [3 /*break*/, 13];
+                                case 13: return [2 /*return*/];
                             }
                         });
                     });

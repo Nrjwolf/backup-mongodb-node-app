@@ -5,13 +5,8 @@ import envConfig from '../configs/env.config'
 const bot = new TelegramBot(envConfig.TELEGRAM_BOT_TOKEN, { polling: true })
 
 export const init = async () => {
-    bot.on("message", onMessage)
     const botMe = await bot.getMe()
     console.log(`✅ Telegram bot @${botMe.username} initialized!`)
-}
-
-const onMessage = (msg: Message) => {
-    
 }
 
 export const logText = async (text: string) => {

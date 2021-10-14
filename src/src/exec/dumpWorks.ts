@@ -1,39 +1,46 @@
+import { Collection, ListDatabasesResult, MongoClient } from 'mongodb'
 import * as child from 'child_process'
 import * as fs from 'fs'
-import dbConfig from '../configs/db.config'
 
 import * as telegram from '../telegram/telegram'
+import envConfig from '../configs/env.config'
 
 const BACKUP_PATH = 'backup'
+const mongURI = envConfig.MONG_URI
+const mongClient = new MongoClient(mongURI, {})
 
 /**
  * 
  * @returns Collections export log
  */
 export const start = async (): Promise<DumpResult> => {
-    // Делается сейв всех коллекций заданных в db.config.ts
     return await new Promise(async function (resolve, reject) {
         try {
-            let result: DumpResult = {
+            let result = {
                 log: '',
-                archivePath: ''
+                archivePath: '',
             }
 
-            // удаляем предыдущий backup
+            // delete previous backup
             child.exec(`rm -r ${BACKUP_PATH}`)
 
-            for (let i = 0; i < dbConfig.bases.length; i++) {
-                const db = dbConfig.bases[i]
-                for (let j = 0; j < db.collections.length; j++) {
-                    const collection = db.collections[j]
-                    const collectionPath = await mongoExport(db.name, collection)
+            await mongoConnect()
+            const dbsResult = await getAllDatabases()
 
-                    // узнать размер коллекции
-                    result.log += `${collectionPath} ${getFileSizeMb(collectionPath)}mb\n`
+            for (let i = 0; i < dbsResult.databases.length; i++) {
+                const db = dbsResult.databases[i]
+                var collections = await mongClient.db(db.name).listCollections().toArray()
+
+                for (let j = 0; j < collections.length; j++) {
+                    const collection = collections[j]
+                    const collectionPath = await mongoExport(db.name, collection.name)
+
+                    // get collection size
+                    result.log += `${collectionPath.replace(`${BACKUP_PATH}/`, '')} ${getFileSizeMb(collectionPath)}mb\n`
                 }
             }
 
-            // делаем зип архив
+            // create zip archive
             const archivePath = await zip(BACKUP_PATH, 'backup')
             result.log += `\nZip archive ~ ${getFileSizeMb(`${BACKUP_PATH}.zip`)}mb`
             result.archivePath = archivePath
@@ -47,6 +54,38 @@ export const start = async (): Promise<DumpResult> => {
         }
     })
 
+}
+
+const mongoConnect = async () => {
+    return await new Promise(function (resolve, reject) {
+        try {
+            mongClient
+                .connect()
+                .then(client => {
+                    resolve(null)
+                })
+        }
+        catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const getAllDatabases = async (): Promise<ListDatabasesResult> => {
+    return await new Promise(function (resolve, reject) {
+        try {
+            mongClient.db().admin().listDatabases().then(dbs => {
+                resolve(dbs)
+            })
+        }
+        catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const getAllCollections = async (dbName: string) => {
+    await mongClient.db(dbName).listCollections().toArray()
 }
 
 const mongoExport = async (dbName: string, collection: string): Promise<string> => {

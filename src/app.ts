@@ -7,6 +7,7 @@ import * as colorsLog from './src/utils/colorsLog'
 import * as dumpWorks from './src/exec/dumpWorks'
 import * as telegram from './src/telegram/telegram'
 import { delay } from './src/utils/utils'
+import appConfig from './src/configs/app.config'
 
 const init = async () => {
     try {
@@ -21,8 +22,8 @@ const init = async () => {
 }
 
 const runProcess = async () => {
-    const delayTimeHours = 6 // каждые n часов
-    const delayTime = delayTimeHours * (60 * (60 * 1000)) 
+    const delayTimeHours = appConfig.DUMP_PROCESS_INTERVAL // run every n hours
+    const delayTime = delayTimeHours * (60 * (60 * 1000))
     while (true) {
         const dumpLog = await dumpWorks.start()
         await telegram.logText(`<pre>${dumpLog.log}</pre>`)

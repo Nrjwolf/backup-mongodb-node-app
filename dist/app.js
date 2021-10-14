@@ -64,6 +64,7 @@ require('./src/utils/colorsLog');
 var dumpWorks = __importStar(require("./src/exec/dumpWorks"));
 var telegram = __importStar(require("./src/telegram/telegram"));
 var utils_1 = require("./src/utils/utils");
+var app_config_1 = __importDefault(require("./src/configs/app.config"));
 var init = function () { return __awaiter(void 0, void 0, void 0, function () {
     var err_1;
     return __generator(this, function (_a) {
@@ -89,7 +90,7 @@ var runProcess = function () { return __awaiter(void 0, void 0, void 0, function
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                delayTimeHours = 6 // каждые n часов
+                delayTimeHours = app_config_1.default.DUMP_PROCESS_INTERVAL // run every n hours
                 ;
                 delayTime = delayTimeHours * (60 * (60 * 1000));
                 _a.label = 1;

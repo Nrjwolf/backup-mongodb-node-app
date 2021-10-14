@@ -4,6 +4,7 @@ import * as fs from 'fs'
 
 import * as telegram from '../telegram/telegram'
 import envConfig from '../configs/env.config'
+import { niceBytes } from '../utils/niceBytes'
 
 const BACKUP_PATH = 'backup'
 const mongURI = envConfig.MONG_URI
@@ -37,7 +38,7 @@ export const start = async (): Promise<DumpResult> => {
                     await mongoExport(db.name, collection.name)
                 }
 
-                result.log += `${db.name} ${getFileSizeMb(`${BACKUP_PATH}/${db.name}`)}mb\n`
+                result.log += `${db.name} ${niceBytes(db.sizeOnDisk!)}\n`
             }
 
             // create zip archive

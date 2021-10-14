@@ -63,6 +63,7 @@ var mongodb_1 = require("mongodb");
 var child = __importStar(require("child_process"));
 var fs = __importStar(require("fs"));
 var env_config_1 = __importDefault(require("../configs/env.config"));
+var niceBytes_1 = require("../utils/niceBytes");
 var BACKUP_PATH = 'backup';
 var mongURI = env_config_1.default.MONG_URI;
 var mongClient = new mongodb_1.MongoClient(mongURI, {});
@@ -115,7 +116,7 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                     j++;
                                     return [3 /*break*/, 5];
                                 case 8:
-                                    result.log += db.name + " " + getFileSizeMb(BACKUP_PATH + "/" + db.name) + "mb\n";
+                                    result.log += db.name + " " + (0, niceBytes_1.niceBytes)(db.sizeOnDisk) + "\n";
                                     _a.label = 9;
                                 case 9:
                                     i++;

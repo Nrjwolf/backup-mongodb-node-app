@@ -25,11 +25,16 @@ const runProcess = async () => {
     const delayTimeHours = appConfig.DUMP_PROCESS_INTERVAL // run every n hours
     const delayTime = delayTimeHours * (60 * (60 * 1000))
     while (true) {
-        const dumpLog = await dumpWorks.start()
-        await telegram.logText(`<pre>${dumpLog.log}</pre>`)
-        await telegram.logFile(dumpLog.archivePath)
+
+        await dumpAndSendToTelegram()
         await delay(delayTime)
     }
+}
+
+export const dumpAndSendToTelegram = async () => {
+    const dumpLog = await dumpWorks.start()
+    await telegram.logText(`<pre>${dumpLog.log}</pre>`)
+    await telegram.logFile(dumpLog.archivePath)
 }
 
 init()

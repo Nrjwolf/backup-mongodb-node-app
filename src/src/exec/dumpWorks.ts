@@ -6,7 +6,7 @@ import * as telegram from '../telegram/telegram'
 import envConfig from '../configs/env.config'
 import { niceBytes } from '../utils/niceBytes'
 
-const BACKUP_PATH = 'backup'
+const BACKUP_PATH = 'dump'
 const mongURI = envConfig.MONG_URI
 const mongClient = new MongoClient(mongURI, {})
 
@@ -30,19 +30,12 @@ export const start = async (): Promise<DumpResult> => {
 
             for (let i = 0; i < dbsResult.databases.length; i++) {
                 const db = dbsResult.databases[i]
-                var collections = await mongClient.db(db.name).listCollections().toArray()
-
-                // get db size
-                for (let j = 0; j < collections.length; j++) {
-                    const collection = collections[j]
-                    await mongoExport(db.name, collection.name)
-                }
-
+                await mongodump(db.name)
                 result.log += `${db.name} ${niceBytes(db.sizeOnDisk!)}\n`
             }
 
             // create zip archive
-            const archivePath = await zip(BACKUP_PATH, 'backup')
+            const archivePath = await zip(BACKUP_PATH, BACKUP_PATH)
             result.log += `\nZip archive ~ ${getFileSizeMb(`${BACKUP_PATH}.zip`)}mb`
             result.archivePath = archivePath
 
@@ -89,13 +82,28 @@ const getAllCollections = async (dbName: string) => {
     await mongClient.db(dbName).listCollections().toArray()
 }
 
-const mongoExport = async (dbName: string, collection: string): Promise<string> => {
+const mongodump = async (dbName: string): Promise<string> => {
     return await new Promise(function (resolve, reject) {
         try {
-            const collectionPath = `${BACKUP_PATH}/${dbName}/${collection}.json`
-            const commandMongoExport = `mongoexport --db ${dbName} -c ${collection} --out ${collectionPath}`
-            var foo: child.ChildProcess = child.exec(commandMongoExport, (error: child.ExecException | null, stdout: string, stderr: string) => {
+            const collectionPath = `${BACKUP_PATH}/${dbName}/`
+            const commandMongoExport = `mongodump --db ${dbName}`
+            child.exec(commandMongoExport, (error: child.ExecException | null, stdout: string, stderr: string) => {
                 resolve(collectionPath)
+            })
+        }
+        catch (error) {
+            console.error(error)
+            reject(error)
+        }
+    })
+}
+
+export const mongorestore = async (dir: string): Promise<string> => {
+    return await new Promise(function (resolve, reject) {
+        try {
+            const commandMongoExport = `mongorestore ${dir}`
+            child.exec(commandMongoExport, (error: child.ExecException | null, stdout: string, stderr: string) => {
+                resolve(stdout)
             })
         }
         catch (error) {

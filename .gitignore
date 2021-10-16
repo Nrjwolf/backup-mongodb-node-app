@@ -1,10 +1,8 @@
-/template
-/backup
+/dump
+/downloaded
 /node_modules
 /.vscode
 *.log
 .env
 *.DS_Store
 *.zip
-
-/src/src/configs/db.config.ts

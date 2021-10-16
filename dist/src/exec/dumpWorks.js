@@ -62,6 +62,7 @@ exports.mongorestore = exports.start = void 0;
 var mongodb_1 = require("mongodb");
 var child = __importStar(require("child_process"));
 var fs = __importStar(require("fs"));
+var zip_a_folder_1 = require("zip-a-folder");
 var env_config_1 = __importDefault(require("../configs/env.config"));
 var niceBytes_1 = require("../utils/niceBytes");
 var BACKUP_PATH = 'dump';
@@ -106,10 +107,12 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 case 5:
                                     i++;
                                     return [3 /*break*/, 3];
-                                case 6: return [4 /*yield*/, zip(BACKUP_PATH, BACKUP_PATH)];
+                                case 6:
+                                    archivePath = BACKUP_PATH + ".zip";
+                                    return [4 /*yield*/, (0, zip_a_folder_1.zip)(BACKUP_PATH, archivePath)];
                                 case 7:
-                                    archivePath = _a.sent();
-                                    result.log += "\nZip archive ~ " + getFileSizeMb(BACKUP_PATH + ".zip") + "mb";
+                                    _a.sent();
+                                    result.log += "\nZip archive ~ " + getFileSizeMb(archivePath) + "mb";
                                     result.archivePath = archivePath;
                                     resolve(result);
                                     console.log(result.log);
@@ -215,33 +218,6 @@ var mongorestore = function (dir) { return __awaiter(void 0, void 0, void 0, fun
     });
 }); };
 exports.mongorestore = mongorestore;
-/**
- *
- * @param folderToZip
- * @param outName
- * @returns archive path
- */
-var zip = function (folderToZip, outName) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
-                    try {
-                        var archivePath_1 = outName + ".zip";
-                        var commandMongoExport = "zip -r " + archivePath_1 + " " + folderToZip;
-                        child.exec(commandMongoExport, function (error, stdout, stderr) {
-                            console.log(stdout);
-                            resolve(archivePath_1);
-                        });
-                    }
-                    catch (error) {
-                        console.error(error);
-                        reject(error);
-                    }
-                })];
-            case 1: return [2 /*return*/, _a.sent()];
-        }
-    });
-}); };
 var getFileSizeMb = function (path) {
     var stats = fs.statSync(path);
     var fileSizeInBytes = stats.size;

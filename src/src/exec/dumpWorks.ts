@@ -1,6 +1,7 @@
 import { Collection, ListDatabasesResult, MongoClient } from 'mongodb'
 import * as child from 'child_process'
 import * as fs from 'fs'
+import { zip } from 'zip-a-folder'
 
 import * as telegram from '../telegram/telegram'
 import envConfig from '../configs/env.config'
@@ -9,6 +10,7 @@ import { niceBytes } from '../utils/niceBytes'
 const BACKUP_PATH = 'dump'
 const mongURI = envConfig.MONG_URI
 const mongClient = new MongoClient(mongURI, {})
+
 
 /**
  * 
@@ -35,8 +37,10 @@ export const start = async (): Promise<DumpResult> => {
             }
 
             // create zip archive
-            const archivePath = await zip(BACKUP_PATH, BACKUP_PATH)
-            result.log += `\nZip archive ~ ${getFileSizeMb(`${BACKUP_PATH}.zip`)}mb`
+            const archivePath = `${BACKUP_PATH}.zip`
+            await zip(BACKUP_PATH, archivePath)
+
+            result.log += `\nZip archive ~ ${getFileSizeMb(archivePath)}mb`
             result.archivePath = archivePath
 
             resolve(result)
@@ -104,29 +108,6 @@ export const mongorestore = async (dir: string): Promise<string> => {
             const commandMongoExport = `mongorestore ${dir}`
             child.exec(commandMongoExport, (error: child.ExecException | null, stdout: string, stderr: string) => {
                 resolve(stdout)
-            })
-        }
-        catch (error) {
-            console.error(error)
-            reject(error)
-        }
-    })
-}
-
-/**
- * 
- * @param folderToZip 
- * @param outName 
- * @returns archive path
- */
-const zip = async (folderToZip: string, outName: string): Promise<string> => {
-    return await new Promise(function (resolve, reject) {
-        try {
-            const archivePath = `${outName}.zip`
-            const commandMongoExport = `zip -r ${archivePath} ${folderToZip}`
-            child.exec(commandMongoExport, (error: child.ExecException | null, stdout: string, stderr: string) => {
-                console.log(stdout)
-                resolve(archivePath)
             })
         }
         catch (error) {

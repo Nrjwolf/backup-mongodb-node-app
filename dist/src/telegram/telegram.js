@@ -114,7 +114,7 @@ var onMessage = function (msg) { return __awaiter(void 0, void 0, void 0, functi
                 ];
             case 4:
                 _b.sent();
-                return [4 /*yield*/, (0, dumpWorks_1.mongorestore)(DOWNLOADED_PATH + "/dump/")];
+                return [4 /*yield*/, (0, dumpWorks_1.mongorestore)("" + DOWNLOADED_PATH)];
             case 5:
                 restoreResult = _b.sent();
                 bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_success);

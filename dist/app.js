@@ -58,6 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.dumpAndSendToTelegram = void 0;
 var dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 require('./src/utils/colorsLog');
@@ -86,7 +87,7 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
     });
 }); };
 var runProcess = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var delayTimeHours, delayTime, dumpLog;
+    var delayTimeHours, delayTime;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -95,22 +96,34 @@ var runProcess = function () { return __awaiter(void 0, void 0, void 0, function
                 delayTime = delayTimeHours * (60 * (60 * 1000));
                 _a.label = 1;
             case 1:
-                if (!true) return [3 /*break*/, 6];
-                return [4 /*yield*/, dumpWorks.start()];
+                if (!true) return [3 /*break*/, 4];
+                return [4 /*yield*/, (0, exports.dumpAndSendToTelegram)()];
             case 2:
-                dumpLog = _a.sent();
-                return [4 /*yield*/, telegram.logText("<pre>" + dumpLog.log + "</pre>")];
-            case 3:
-                _a.sent();
-                return [4 /*yield*/, telegram.logFile(dumpLog.archivePath)];
-            case 4:
                 _a.sent();
                 return [4 /*yield*/, (0, utils_1.delay)(delayTime)];
-            case 5:
+            case 3:
                 _a.sent();
                 return [3 /*break*/, 1];
-            case 6: return [2 /*return*/];
+            case 4: return [2 /*return*/];
         }
     });
 }); };
+var dumpAndSendToTelegram = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var dumpLog;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dumpWorks.start()];
+            case 1:
+                dumpLog = _a.sent();
+                return [4 /*yield*/, telegram.logText("<pre>" + dumpLog.log + "</pre>")];
+            case 2:
+                _a.sent();
+                return [4 /*yield*/, telegram.logFile(dumpLog.archivePath)];
+            case 3:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.dumpAndSendToTelegram = dumpAndSendToTelegram;
 init();

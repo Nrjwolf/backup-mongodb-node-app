@@ -58,13 +58,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.start = void 0;
+exports.mongorestore = exports.start = void 0;
 var mongodb_1 = require("mongodb");
 var child = __importStar(require("child_process"));
 var fs = __importStar(require("fs"));
 var env_config_1 = __importDefault(require("../configs/env.config"));
 var niceBytes_1 = require("../utils/niceBytes");
-var BACKUP_PATH = 'backup';
+var BACKUP_PATH = 'dump';
 var mongURI = env_config_1.default.MONG_URI;
 var mongClient = new mongodb_1.MongoClient(mongURI, {});
 /**
@@ -76,11 +76,11 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
         switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var result, dbsResult, i, db, collections, j, collection, archivePath, error_1;
+                        var result, dbsResult, i, db, archivePath, error_1;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 12, , 13]);
+                                    _a.trys.push([0, 8, , 9]);
                                     result = {
                                         log: '',
                                         archivePath: '',
@@ -96,45 +96,30 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                     i = 0;
                                     _a.label = 3;
                                 case 3:
-                                    if (!(i < dbsResult.databases.length)) return [3 /*break*/, 10];
+                                    if (!(i < dbsResult.databases.length)) return [3 /*break*/, 6];
                                     db = dbsResult.databases[i];
-                                    return [4 /*yield*/, mongClient.db(db.name).listCollections().toArray()
-                                        // get db size
-                                    ];
+                                    return [4 /*yield*/, mongodump(db.name)];
                                 case 4:
-                                    collections = _a.sent();
-                                    j = 0;
+                                    _a.sent();
+                                    result.log += db.name + " " + (0, niceBytes_1.niceBytes)(db.sizeOnDisk) + "\n";
                                     _a.label = 5;
                                 case 5:
-                                    if (!(j < collections.length)) return [3 /*break*/, 8];
-                                    collection = collections[j];
-                                    return [4 /*yield*/, mongoExport(db.name, collection.name)];
-                                case 6:
-                                    _a.sent();
-                                    _a.label = 7;
-                                case 7:
-                                    j++;
-                                    return [3 /*break*/, 5];
-                                case 8:
-                                    result.log += db.name + " " + (0, niceBytes_1.niceBytes)(db.sizeOnDisk) + "\n";
-                                    _a.label = 9;
-                                case 9:
                                     i++;
                                     return [3 /*break*/, 3];
-                                case 10: return [4 /*yield*/, zip(BACKUP_PATH, 'backup')];
-                                case 11:
+                                case 6: return [4 /*yield*/, zip(BACKUP_PATH, BACKUP_PATH)];
+                                case 7:
                                     archivePath = _a.sent();
                                     result.log += "\nZip archive ~ " + getFileSizeMb(BACKUP_PATH + ".zip") + "mb";
                                     result.archivePath = archivePath;
                                     resolve(result);
                                     console.log(result.log);
-                                    return [3 /*break*/, 13];
-                                case 12:
+                                    return [3 /*break*/, 9];
+                                case 8:
                                     error_1 = _a.sent();
                                     console.error(error_1);
                                     reject(error_1);
-                                    return [3 /*break*/, 13];
-                                case 13: return [2 /*return*/];
+                                    return [3 /*break*/, 9];
+                                case 9: return [2 /*return*/];
                             }
                         });
                     });
@@ -190,14 +175,14 @@ var getAllCollections = function (dbName) { return __awaiter(void 0, void 0, voi
         }
     });
 }); };
-var mongoExport = function (dbName, collection) { return __awaiter(void 0, void 0, void 0, function () {
+var mongodump = function (dbName) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     try {
-                        var collectionPath_1 = BACKUP_PATH + "/" + dbName + "/" + collection + ".json";
-                        var commandMongoExport = "mongoexport --db " + dbName + " -c " + collection + " --out " + collectionPath_1;
-                        var foo = child.exec(commandMongoExport, function (error, stdout, stderr) {
+                        var collectionPath_1 = BACKUP_PATH + "/" + dbName + "/";
+                        var commandMongoExport = "mongodump --db " + dbName;
+                        child.exec(commandMongoExport, function (error, stdout, stderr) {
                             resolve(collectionPath_1);
                         });
                     }
@@ -210,6 +195,26 @@ var mongoExport = function (dbName, collection) { return __awaiter(void 0, void 
         }
     });
 }); };
+var mongorestore = function (dir) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
+                    try {
+                        var commandMongoExport = "mongorestore " + dir;
+                        child.exec(commandMongoExport, function (error, stdout, stderr) {
+                            resolve(stdout);
+                        });
+                    }
+                    catch (error) {
+                        console.error(error);
+                        reject(error);
+                    }
+                })];
+            case 1: return [2 /*return*/, _a.sent()];
+        }
+    });
+}); };
+exports.mongorestore = mongorestore;
 /**
  *
  * @param folderToZip

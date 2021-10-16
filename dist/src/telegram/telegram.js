@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -39,9 +58,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logFile = exports.logText = exports.init = void 0;
+exports.logFile = exports.logText = exports.onMessage = exports.init = void 0;
 var node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
+var download_1 = __importDefault(require("download"));
+var extract_zip_1 = __importDefault(require("extract-zip"));
+var child = __importStar(require("child_process"));
 var env_config_1 = __importDefault(require("../configs/env.config"));
+var path_1 = __importDefault(require("path"));
+var dumpWorks_1 = require("../exec/dumpWorks");
+var telegramBotReplies_config_1 = __importDefault(require("../configs/telegramBotReplies.config"));
+var app_1 = require("../../app");
+var DOWNLOADED_PATH = 'downloaded';
 var bot = new node_telegram_bot_api_1.default(env_config_1.default.TELEGRAM_BOT_TOKEN, { polling: true });
 var init = function () { return __awaiter(void 0, void 0, void 0, function () {
     var botMe;
@@ -50,12 +77,58 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
             case 0: return [4 /*yield*/, bot.getMe()];
             case 1:
                 botMe = _a.sent();
+                bot.on('message', exports.onMessage);
                 console.log("\u2705 Telegram bot @" + botMe.username + " initialized!");
                 return [2 /*return*/];
         }
     });
 }); };
 exports.init = init;
+var onMessage = function (msg) { return __awaiter(void 0, void 0, void 0, function () {
+    var telegram_file, telegram_url, restoreResult, err_1;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                if (((_a = msg.from) === null || _a === void 0 ? void 0 : _a.id.toString()) != env_config_1.default.ADMIN_TELEGRAM_ID)
+                    return [2 /*return*/];
+                if (msg.text == '/start') {
+                    (0, app_1.dumpAndSendToTelegram)();
+                }
+                if (!msg.document) return [3 /*break*/, 7];
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 6, , 7]);
+                bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_started);
+                // delete previous backup
+                child.exec("rm -r " + DOWNLOADED_PATH);
+                return [4 /*yield*/, bot.getFile(msg.document.file_id)];
+            case 2:
+                telegram_file = _b.sent();
+                telegram_url = "https://api.telegram.org/file/bot" + env_config_1.default.TELEGRAM_BOT_TOKEN + "/" + telegram_file.file_path;
+                return [4 /*yield*/, (0, download_1.default)(telegram_url, DOWNLOADED_PATH)];
+            case 3:
+                _b.sent();
+                return [4 /*yield*/, (0, extract_zip_1.default)(DOWNLOADED_PATH + "/" + path_1.default.basename(telegram_file.file_path), { dir: process.cwd() + "/" + DOWNLOADED_PATH })
+                    // restore
+                ];
+            case 4:
+                _b.sent();
+                return [4 /*yield*/, (0, dumpWorks_1.mongorestore)(DOWNLOADED_PATH + "/dump/")];
+            case 5:
+                restoreResult = _b.sent();
+                bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_success);
+                return [3 /*break*/, 7];
+            case 6:
+                err_1 = _b.sent();
+                bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_fail);
+                bot.sendMessage(msg.from.id, err_1.message);
+                return [3 /*break*/, 7];
+            case 7: return [2 /*return*/];
+        }
+    });
+}); };
+exports.onMessage = onMessage;
 var logText = function (text) { return __awaiter(void 0, void 0, void 0, function () {
     var options;
     return __generator(this, function (_a) {

@@ -11,7 +11,6 @@ const BACKUP_PATH = 'dump'
 const mongURI = envConfig.MONG_URI
 const mongClient = new MongoClient(mongURI, {})
 
-
 /**
  * 
  * @returns Collections export log
@@ -42,6 +41,8 @@ export const start = async (): Promise<DumpResult> => {
 
             result.log += `\nZip archive ~ ${getFileSizeMb(archivePath)}mb`
             result.archivePath = archivePath
+
+            await mongClient.close()
 
             resolve(result)
             console.log(result.log)

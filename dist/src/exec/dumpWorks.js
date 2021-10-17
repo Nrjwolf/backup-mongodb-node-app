@@ -81,7 +81,7 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 8, , 9]);
+                                    _a.trys.push([0, 9, , 10]);
                                     result = {
                                         log: '',
                                         archivePath: '',
@@ -114,15 +114,18 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                     _a.sent();
                                     result.log += "\nZip archive ~ " + getFileSizeMb(archivePath) + "mb";
                                     result.archivePath = archivePath;
+                                    return [4 /*yield*/, mongClient.close()];
+                                case 8:
+                                    _a.sent();
                                     resolve(result);
                                     console.log(result.log);
-                                    return [3 /*break*/, 9];
-                                case 8:
+                                    return [3 /*break*/, 10];
+                                case 9:
                                     error_1 = _a.sent();
                                     console.error(error_1);
                                     reject(error_1);
-                                    return [3 /*break*/, 9];
-                                case 9: return [2 /*return*/];
+                                    return [3 /*break*/, 10];
+                                case 10: return [2 /*return*/];
                             }
                         });
                     });

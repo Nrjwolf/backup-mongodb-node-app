@@ -54,20 +54,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mongorestore = exports.start = void 0;
-var mongodb_1 = require("mongodb");
+exports.getDirectories = exports.mongorestore = exports.start = void 0;
 var child = __importStar(require("child_process"));
 var fs = __importStar(require("fs"));
 var zip_a_folder_1 = require("zip-a-folder");
-var env_config_1 = __importDefault(require("../configs/env.config"));
 var niceBytes_1 = require("../utils/niceBytes");
 var BACKUP_PATH = 'dump';
-var mongURI = env_config_1.default.MONG_URI;
-var mongClient = new mongodb_1.MongoClient(mongURI, {});
 /**
  *
  * @returns Collections export log
@@ -77,55 +70,46 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
         switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var result, dbsResult, i, db, archivePath, error_1;
+                        var result, allDirectories, i, dir, fullDir, archivePath, error_1;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 9, , 10]);
+                                    _a.trys.push([0, 5, , 6]);
                                     result = {
                                         log: '',
                                         archivePath: '',
                                     };
-                                    // delete previous backup
-                                    child.exec("rm -r " + BACKUP_PATH);
-                                    return [4 /*yield*/, mongoConnect()];
+                                    return [4 /*yield*/, execAsync("rm -r " + BACKUP_PATH)]; // delete previous backup
                                 case 1:
-                                    _a.sent();
-                                    return [4 /*yield*/, getAllDatabases()];
+                                    _a.sent(); // delete previous backup
+                                    return [4 /*yield*/, execAsync("mongodump")
+                                        // log sizes
+                                    ]; // create dump
                                 case 2:
-                                    dbsResult = _a.sent();
-                                    i = 0;
-                                    _a.label = 3;
+                                    _a.sent(); // create dump
+                                    return [4 /*yield*/, (0, exports.getDirectories)(BACKUP_PATH)];
                                 case 3:
-                                    if (!(i < dbsResult.databases.length)) return [3 /*break*/, 6];
-                                    db = dbsResult.databases[i];
-                                    return [4 /*yield*/, mongodump(db.name)];
-                                case 4:
-                                    _a.sent();
-                                    result.log += db.name + " " + (0, niceBytes_1.niceBytes)(db.sizeOnDisk) + "\n";
-                                    _a.label = 5;
-                                case 5:
-                                    i++;
-                                    return [3 /*break*/, 3];
-                                case 6:
+                                    allDirectories = _a.sent();
+                                    for (i = 0; i < allDirectories.length; i++) {
+                                        dir = allDirectories[i];
+                                        fullDir = BACKUP_PATH + "/" + dir;
+                                        result.log += dir + " " + getFileSizeMb(fullDir) + "\n";
+                                    }
                                     archivePath = BACKUP_PATH + ".zip";
                                     return [4 /*yield*/, (0, zip_a_folder_1.zip)(BACKUP_PATH, archivePath)];
-                                case 7:
+                                case 4:
                                     _a.sent();
-                                    result.log += "\nZip archive ~ " + getFileSizeMb(archivePath) + "mb";
+                                    result.log += "\nZip archive ~ " + getFileSizeMb(archivePath);
                                     result.archivePath = archivePath;
-                                    return [4 /*yield*/, mongClient.close()];
-                                case 8:
-                                    _a.sent();
                                     resolve(result);
                                     console.log(result.log);
-                                    return [3 /*break*/, 10];
-                                case 9:
+                                    return [3 /*break*/, 6];
+                                case 5:
                                     error_1 = _a.sent();
                                     console.error(error_1);
                                     reject(error_1);
-                                    return [3 /*break*/, 10];
-                                case 10: return [2 /*return*/];
+                                    return [3 /*break*/, 6];
+                                case 6: return [2 /*return*/];
                             }
                         });
                     });
@@ -135,79 +119,29 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
     });
 }); };
 exports.start = start;
-var mongoConnect = function () { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
-                    try {
-                        mongClient
-                            .connect()
-                            .then(function (client) {
-                            resolve(null);
-                        });
-                    }
-                    catch (error) {
-                        reject(error);
-                    }
-                })];
-            case 1: return [2 /*return*/, _a.sent()];
-        }
-    });
-}); };
-var getAllDatabases = function () { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
-                    try {
-                        mongClient.db().admin().listDatabases().then(function (dbs) {
-                            resolve(dbs);
-                        });
-                    }
-                    catch (error) {
-                        reject(error);
-                    }
-                })];
-            case 1: return [2 /*return*/, _a.sent()];
-        }
-    });
-}); };
-var getAllCollections = function (dbName) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, mongClient.db(dbName).listCollections().toArray()];
-            case 1:
-                _a.sent();
-                return [2 /*return*/];
-        }
-    });
-}); };
-var mongodump = function (dbName) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
-                    try {
-                        var collectionPath_1 = BACKUP_PATH + "/" + dbName + "/";
-                        var commandMongoExport = "mongodump --db " + dbName;
-                        child.exec(commandMongoExport, function (error, stdout, stderr) {
-                            resolve(collectionPath_1);
-                        });
-                    }
-                    catch (error) {
-                        console.error(error);
-                        reject(error);
-                    }
-                })];
-            case 1: return [2 /*return*/, _a.sent()];
-        }
-    });
-}); };
 var mongorestore = function (dir) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
+            case 0: return [4 /*yield*/, execAsync("mongorestore " + dir)];
+            case 1: return [2 /*return*/, _a.sent()];
+        }
+    });
+}); };
+exports.mongorestore = mongorestore;
+var getDirectories = function (path) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        return [2 /*return*/, fs.readdirSync(path).filter(function (file) {
+                return fs.statSync(path + '/' + file).isDirectory();
+            })];
+    });
+}); };
+exports.getDirectories = getDirectories;
+var execAsync = function (command) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     try {
-                        var commandMongoExport = "mongorestore " + dir;
-                        child.exec(commandMongoExport, function (error, stdout, stderr) {
+                        child.exec(command, function (error, stdout, stderr) {
                             resolve(stdout);
                         });
                     }
@@ -220,10 +154,7 @@ var mongorestore = function (dir) { return __awaiter(void 0, void 0, void 0, fun
         }
     });
 }); };
-exports.mongorestore = mongorestore;
 var getFileSizeMb = function (path) {
     var stats = fs.statSync(path);
-    var fileSizeInBytes = stats.size;
-    var mb = fileSizeInBytes / (1024 * 1024);
-    return mb.toFixed(2);
+    return (0, niceBytes_1.niceBytes)(stats.size);
 };

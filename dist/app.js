@@ -65,7 +65,8 @@ require('./src/utils/colorsLog');
 var dumpWorks = __importStar(require("./src/exec/dumpWorks"));
 var telegram = __importStar(require("./src/telegram/telegram"));
 var utils_1 = require("./src/utils/utils");
-var app_config_1 = __importDefault(require("./src/configs/app.config"));
+var env_config_1 = __importDefault(require("./src/configs/env.config"));
+var telegramBotReplies_config_1 = __importDefault(require("./src/configs/telegramBotReplies.config"));
 var init = function () { return __awaiter(void 0, void 0, void 0, function () {
     var err_1;
     return __generator(this, function (_a) {
@@ -91,7 +92,7 @@ var runProcess = function () { return __awaiter(void 0, void 0, void 0, function
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                delayTimeHours = app_config_1.default.DUMP_PROCESS_INTERVAL // run every n hours
+                delayTimeHours = parseInt(env_config_1.default.DUMP_PROCESS_INTERVAL) // run every n hours
                 ;
                 delayTime = delayTimeHours * (60 * (60 * 1000));
                 _a.label = 1;
@@ -120,6 +121,9 @@ var dumpAndSendToTelegram = function () { return __awaiter(void 0, void 0, void 
                 _a.sent();
                 return [4 /*yield*/, telegram.logFile(dumpLog.archivePath)];
             case 3:
+                _a.sent();
+                return [4 /*yield*/, telegram.logText(telegramBotReplies_config_1.default.other.next_dump_time.replace('{0}', env_config_1.default.DUMP_PROCESS_INTERVAL))];
+            case 4:
                 _a.sent();
                 return [2 /*return*/];
         }

@@ -68,6 +68,7 @@ var path_1 = __importDefault(require("path"));
 var dumpWorks_1 = require("../exec/dumpWorks");
 var telegramBotReplies_config_1 = __importDefault(require("../configs/telegramBotReplies.config"));
 var app_1 = require("../../app");
+var utils_1 = require("../utils/utils");
 var DOWNLOADED_PATH = 'downloaded';
 var bot = new node_telegram_bot_api_1.default(env_config_1.default.TELEGRAM_BOT_TOKEN, { polling: true });
 var init = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -79,13 +80,14 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
                 botMe = _a.sent();
                 bot.on('message', exports.onMessage);
                 console.log("\u2705 Telegram bot @" + botMe.username + " initialized!");
+                (0, exports.logText)(telegramBotReplies_config_1.default.other.bot_started);
                 return [2 /*return*/];
         }
     });
 }); };
 exports.init = init;
 var onMessage = function (msg) { return __awaiter(void 0, void 0, void 0, function () {
-    var telegram_file, telegram_url, restoreResult, err_1;
+    var telegram_file, telegram_url, err_1;
     var _a;
     return __generator(this, function (_b) {
         switch (_b.label) {
@@ -114,9 +116,11 @@ var onMessage = function (msg) { return __awaiter(void 0, void 0, void 0, functi
                 ];
             case 4:
                 _b.sent();
+                // restore
                 return [4 /*yield*/, (0, dumpWorks_1.mongorestore)("" + DOWNLOADED_PATH)];
             case 5:
-                restoreResult = _b.sent();
+                // restore
+                _b.sent();
                 bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_success);
                 return [3 /*break*/, 7];
             case 6:
@@ -146,14 +150,21 @@ var logText = function (text) { return __awaiter(void 0, void 0, void 0, functio
 }); };
 exports.logText = logText;
 var logFile = function (path) { return __awaiter(void 0, void 0, void 0, function () {
-    var fileOptions;
+    var botMe, fileOptions;
     return __generator(this, function (_a) {
-        fileOptions = {
-            filename: 'mongoexport.zip',
-            contentType: 'application/octet-stream',
-        };
-        bot.sendDocument(env_config_1.default.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions);
-        return [2 /*return*/];
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, bot.getMe()];
+            case 1:
+                botMe = _a.sent();
+                fileOptions = {
+                    filename: "Mongodump " + botMe.first_name + " " + (0, utils_1.getCurrentDateFormat)() + ".zip",
+                    contentType: 'application/octet-stream',
+                };
+                return [4 /*yield*/, bot.sendDocument(env_config_1.default.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions)];
+            case 2:
+                _a.sent();
+                return [2 /*return*/];
+        }
     });
 }); };
 exports.logFile = logFile;

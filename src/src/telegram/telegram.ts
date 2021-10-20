@@ -7,6 +7,7 @@ import path from 'path'
 import { mongorestore } from '../exec/dumpWorks'
 import telegramBotRepliesConfig from '../configs/telegramBotReplies.config'
 import { dumpAndSendToTelegram } from '../../app'
+import { getCurrentDateFormat } from '../utils/utils'
 
 const DOWNLOADED_PATH = 'downloaded'
 const bot = new TelegramBot(envConfig.TELEGRAM_BOT_TOKEN, { polling: true })
@@ -15,6 +16,7 @@ export const init = async () => {
     const botMe = await bot.getMe()
     bot.on('message', onMessage)
     console.log(`✅ Telegram bot @${botMe.username} initialized!`)
+    logText(telegramBotRepliesConfig.other.bot_started)
 }
 
 export const onMessage = async (msg: Message) => {
@@ -24,7 +26,7 @@ export const onMessage = async (msg: Message) => {
         dumpAndSendToTelegram()
     }
 
-    // download dump.zip
+    // Here is restoring process with recieved dump
     if (msg.document) {
         try {
             bot.sendMessage(msg.from.id, telegramBotRepliesConfig.restore.restore_started)
@@ -58,9 +60,10 @@ export const logText = async (text: string) => {
 }
 
 export const logFile = async (path: string) => {
+    const botMe = await bot.getMe()
     const fileOptions = {
-        filename: 'mongoexport.zip',
+        filename: `Mongodump ${botMe.first_name} ${getCurrentDateFormat()}.zip`,
         contentType: 'application/octet-stream',
     }
-    bot.sendDocument(envConfig.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions)
+    await bot.sendDocument(envConfig.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions)
 }

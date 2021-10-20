@@ -54,9 +54,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDirectories = exports.mongorestore = exports.start = void 0;
 var child = __importStar(require("child_process"));
+var fast_folder_size_1 = __importDefault(require("fast-folder-size"));
 var fs = __importStar(require("fs"));
 var zip_a_folder_1 = require("zip-a-folder");
 var niceBytes_1 = require("../utils/niceBytes");
@@ -70,11 +74,11 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
         switch (_a.label) {
             case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var result, allDirectories, i, dir, fullDir, archivePath, error_1;
+                        var result, allDirectories, i, dir, fullDir, size, archivePath, error_1;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 5, , 6]);
+                                    _a.trys.push([0, 9, , 10]);
                                     result = {
                                         log: '',
                                         archivePath: '',
@@ -90,26 +94,36 @@ var start = function () { return __awaiter(void 0, void 0, void 0, function () {
                                     return [4 /*yield*/, (0, exports.getDirectories)(BACKUP_PATH)];
                                 case 3:
                                     allDirectories = _a.sent();
-                                    for (i = 0; i < allDirectories.length; i++) {
-                                        dir = allDirectories[i];
-                                        fullDir = BACKUP_PATH + "/" + dir;
-                                        result.log += dir + " " + getFileSizeMb(fullDir) + "\n";
-                                    }
+                                    i = 0;
+                                    _a.label = 4;
+                                case 4:
+                                    if (!(i < allDirectories.length)) return [3 /*break*/, 7];
+                                    dir = allDirectories[i];
+                                    fullDir = BACKUP_PATH + "/" + dir;
+                                    return [4 /*yield*/, getFolderSize(fullDir)];
+                                case 5:
+                                    size = _a.sent();
+                                    result.log += dir + " " + size + "\n";
+                                    _a.label = 6;
+                                case 6:
+                                    i++;
+                                    return [3 /*break*/, 4];
+                                case 7:
                                     archivePath = BACKUP_PATH + ".zip";
                                     return [4 /*yield*/, (0, zip_a_folder_1.zip)(BACKUP_PATH, archivePath)];
-                                case 4:
+                                case 8:
                                     _a.sent();
-                                    result.log += "\nZip archive ~ " + getFileSizeMb(archivePath);
+                                    result.log += "\nZip archive ~ " + getFileSize(archivePath);
                                     result.archivePath = archivePath;
                                     resolve(result);
                                     console.log(result.log);
-                                    return [3 /*break*/, 6];
-                                case 5:
+                                    return [3 /*break*/, 10];
+                                case 9:
                                     error_1 = _a.sent();
                                     console.error(error_1);
                                     reject(error_1);
-                                    return [3 /*break*/, 6];
-                                case 6: return [2 /*return*/];
+                                    return [3 /*break*/, 10];
+                                case 10: return [2 /*return*/];
                             }
                         });
                     });
@@ -154,7 +168,29 @@ var execAsync = function (command) { return __awaiter(void 0, void 0, void 0, fu
         }
     });
 }); };
-var getFileSizeMb = function (path) {
+var getFileSize = function (path) {
     var stats = fs.statSync(path);
     return (0, niceBytes_1.niceBytes)(stats.size);
 };
+var getFolderSize = function (path) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
+                    try {
+                        (0, fast_folder_size_1.default)(path, function (err, bytes) {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                resolve((0, niceBytes_1.niceBytes)(bytes));
+                            }
+                        });
+                    }
+                    catch (error) {
+                        reject(error);
+                    }
+                })];
+            case 1: return [2 /*return*/, _a.sent()];
+        }
+    });
+}); };

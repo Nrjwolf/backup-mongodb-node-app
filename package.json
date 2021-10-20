@@ -21,6 +21,7 @@
     "dotenv": "^10.0.0",
     "download": "^8.0.0",
     "extract-zip": "^2.0.1",
+    "fast-folder-size": "^1.5.0",
     "node-telegram-bot-api": "^0.54.0",
     "zip-a-folder": "^1.1.0"
   }

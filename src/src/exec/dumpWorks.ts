@@ -1,4 +1,5 @@
 import * as child from 'child_process'
+import fastFolderSize from 'fast-folder-size'
 import * as fs from 'fs'
 import { zip } from 'zip-a-folder'
 
@@ -27,14 +28,15 @@ export const start = async (): Promise<DumpResult> => {
             for (let i = 0; i < allDirectories.length; i++) {
                 const dir = allDirectories[i]
                 const fullDir = `${BACKUP_PATH}/${dir}`
-                result.log += `${dir} ${getFileSizeMb(fullDir)}\n`
+                const size = await getFolderSize(fullDir)
+                result.log += `${dir} ${size}\n`
             }
 
             // create zip archive
             const archivePath = `${BACKUP_PATH}.zip`
             await zip(BACKUP_PATH, archivePath)
 
-            result.log += `\nZip archive ~ ${getFileSizeMb(archivePath)}`
+            result.log += `\nZip archive ~ ${getFileSize(archivePath)}`
             result.archivePath = archivePath
 
             resolve(result)
@@ -72,9 +74,27 @@ const execAsync = async (command: string): Promise<string> => {
     })
 }
 
-const getFileSizeMb = (path: string) => {
+const getFileSize = (path: string) => {
     const stats = fs.statSync(path)
     return niceBytes(stats.size)
+}
+
+const getFolderSize = async (path: string) => {
+    return await new Promise(function (resolve, reject) {
+        try {
+            fastFolderSize(path, (err, bytes) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(niceBytes(bytes!))
+                }
+            })
+        }
+        catch (error) {
+            reject(error)
+        }
+    })
+
 }
 
 export type DumpResult = {

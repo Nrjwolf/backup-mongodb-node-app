@@ -1,15 +1,11 @@
-import { Collection, ListDatabasesResult, MongoClient } from 'mongodb'
 import * as child from 'child_process'
 import * as fs from 'fs'
 import { zip } from 'zip-a-folder'
 
-import * as telegram from '../telegram/telegram'
 import envConfig from '../configs/env.config'
 import { niceBytes } from '../utils/niceBytes'
 
 const BACKUP_PATH = 'dump'
-const mongURI = envConfig.MONG_URI
-const mongClient = new MongoClient(mongURI, {})
 
 /**
  * 
@@ -23,26 +19,23 @@ export const start = async (): Promise<DumpResult> => {
                 archivePath: '',
             }
 
-            // delete previous backup
-            child.exec(`rm -r ${BACKUP_PATH}`)
+            await execAsync(`rm -r ${BACKUP_PATH}`) // delete previous backup
+            await execAsync(`mongodump`) // create dump
 
-            await mongoConnect()
-            const dbsResult = await getAllDatabases()
-
-            for (let i = 0; i < dbsResult.databases.length; i++) {
-                const db = dbsResult.databases[i]
-                await mongodump(db.name)
-                result.log += `${db.name} ${niceBytes(db.sizeOnDisk!)}\n`
+            // log sizes
+            const allDirectories = await getDirectories(BACKUP_PATH)
+            for (let i = 0; i < allDirectories.length; i++) {
+                const dir = allDirectories[i]
+                const fullDir = `${BACKUP_PATH}/${dir}`
+                result.log += `${dir} ${getFileSizeMb(fullDir)}\n`
             }
 
             // create zip archive
             const archivePath = `${BACKUP_PATH}.zip`
             await zip(BACKUP_PATH, archivePath)
 
-            result.log += `\nZip archive ~ ${getFileSizeMb(archivePath)}mb`
+            result.log += `\nZip archive ~ ${getFileSizeMb(archivePath)}`
             result.archivePath = archivePath
-
-            await mongClient.close()
 
             resolve(result)
             console.log(result.log)
@@ -55,59 +48,20 @@ export const start = async (): Promise<DumpResult> => {
 
 }
 
-const mongoConnect = async () => {
-    return await new Promise(function (resolve, reject) {
-        try {
-            mongClient
-                .connect()
-                .then(client => {
-                    resolve(null)
-                })
-        }
-        catch (error) {
-            reject(error)
-        }
-    })
-}
-
-const getAllDatabases = async (): Promise<ListDatabasesResult> => {
-    return await new Promise(function (resolve, reject) {
-        try {
-            mongClient.db().admin().listDatabases().then(dbs => {
-                resolve(dbs)
-            })
-        }
-        catch (error) {
-            reject(error)
-        }
-    })
-}
-
-const getAllCollections = async (dbName: string) => {
-    await mongClient.db(dbName).listCollections().toArray()
-}
-
-const mongodump = async (dbName: string): Promise<string> => {
-    return await new Promise(function (resolve, reject) {
-        try {
-            const collectionPath = `${BACKUP_PATH}/${dbName}/`
-            const commandMongoExport = `mongodump --db ${dbName}`
-            child.exec(commandMongoExport, (error: child.ExecException | null, stdout: string, stderr: string) => {
-                resolve(collectionPath)
-            })
-        }
-        catch (error) {
-            console.error(error)
-            reject(error)
-        }
-    })
-}
-
 export const mongorestore = async (dir: string): Promise<string> => {
+    return await execAsync(`mongorestore ${dir}`)
+}
+
+export const getDirectories = async (path: string): Promise<string[]> => {
+    return fs.readdirSync(path).filter(function (file) {
+        return fs.statSync(path + '/' + file).isDirectory()
+    })
+}
+
+const execAsync = async (command: string): Promise<string> => {
     return await new Promise(function (resolve, reject) {
         try {
-            const commandMongoExport = `mongorestore ${dir}`
-            child.exec(commandMongoExport, (error: child.ExecException | null, stdout: string, stderr: string) => {
+            child.exec(command, (error: child.ExecException | null, stdout: string, stderr: string) => {
                 resolve(stdout)
             })
         }
@@ -120,9 +74,7 @@ export const mongorestore = async (dir: string): Promise<string> => {
 
 const getFileSizeMb = (path: string) => {
     const stats = fs.statSync(path)
-    const fileSizeInBytes = stats.size
-    const mb = fileSizeInBytes / (1024 * 1024)
-    return mb.toFixed(2)
+    return niceBytes(stats.size)
 }
 
 export type DumpResult = {

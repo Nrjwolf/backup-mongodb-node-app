@@ -13,28 +13,24 @@ import telegramBotRepliesConfig from './src/configs/telegramBotReplies.config'
 const init = async () => {
     try {
         await telegram.init()
-
         console.log(`✅✅✅ Initialization COMPLETE!`.green())
-        runProcess()
+        appProcess()
     }
     catch (err) {
         console.log(`❌❌❌ Initialization FAILED!`.red())
     }
 }
 
-const runProcess = async () => {
+const appProcess = async () => {
     const delayTimeHours = parseInt(envConfig.DUMP_PROCESS_INTERVAL) // run every n hours
     const delayTime = delayTimeHours * (60 * (60 * 1000))
-    while (true) {
-
-        await dumpAndSendToTelegram()
-        await delay(delayTime)
-    }
+    dumpAndSendToTelegram()
+    setInterval(dumpAndSendToTelegram, delayTime)
 }
 
 export const dumpAndSendToTelegram = async () => {
     const dumpLog = await dumpWorks.start()
-    await telegram.logText(`<pre>${dumpLog.log}</pre>`)
+    await telegram.logText(`#${telegram.botInfo.username}\n\n<pre>${dumpLog.log}</pre>`)
     await telegram.logFile(dumpLog.archivePath)
     await telegram.logText(telegramBotRepliesConfig.other.next_dump_time.replace('{0}', envConfig.DUMP_PROCESS_INTERVAL))
 }

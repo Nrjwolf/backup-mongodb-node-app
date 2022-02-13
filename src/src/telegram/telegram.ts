@@ -10,12 +10,13 @@ import { dumpAndSendToTelegram } from '../../app'
 import { getCurrentDateFormat } from '../utils/utils'
 
 const DOWNLOADED_PATH = 'downloaded'
-const bot = new TelegramBot(envConfig.TELEGRAM_BOT_TOKEN, { polling: true })
+export const bot = new TelegramBot(envConfig.TELEGRAM_BOT_TOKEN, { polling: true })
+export let botInfo: TelegramBot.User
 
 export const init = async () => {
-    const botMe = await bot.getMe()
+    botInfo = await bot.getMe()
     bot.on('message', onMessage)
-    console.log(`✅ Telegram bot @${botMe.username} initialized!`)
+    console.log(`✅ Telegram bot @${botInfo.username} initialized!`)
     logText(telegramBotRepliesConfig.other.bot_started)
 }
 

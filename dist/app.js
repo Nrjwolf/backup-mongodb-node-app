@@ -64,7 +64,6 @@ dotenv_1.default.config();
 require('./src/utils/colorsLog');
 var dumpWorks = __importStar(require("./src/exec/dumpWorks"));
 var telegram = __importStar(require("./src/telegram/telegram"));
-var utils_1 = require("./src/utils/utils");
 var env_config_1 = __importDefault(require("./src/configs/env.config"));
 var telegramBotReplies_config_1 = __importDefault(require("./src/configs/telegramBotReplies.config"));
 var init = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -77,7 +76,7 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
             case 1:
                 _a.sent();
                 console.log("\u2705\u2705\u2705 Initialization COMPLETE!".green());
-                runProcess();
+                appProcess();
                 return [3 /*break*/, 3];
             case 2:
                 err_1 = _a.sent();
@@ -87,26 +86,15 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
         }
     });
 }); };
-var runProcess = function () { return __awaiter(void 0, void 0, void 0, function () {
+var appProcess = function () { return __awaiter(void 0, void 0, void 0, function () {
     var delayTimeHours, delayTime;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                delayTimeHours = parseInt(env_config_1.default.DUMP_PROCESS_INTERVAL) // run every n hours
-                ;
-                delayTime = delayTimeHours * (60 * (60 * 1000));
-                _a.label = 1;
-            case 1:
-                if (!true) return [3 /*break*/, 4];
-                return [4 /*yield*/, (0, exports.dumpAndSendToTelegram)()];
-            case 2:
-                _a.sent();
-                return [4 /*yield*/, (0, utils_1.delay)(delayTime)];
-            case 3:
-                _a.sent();
-                return [3 /*break*/, 1];
-            case 4: return [2 /*return*/];
-        }
+        delayTimeHours = parseInt(env_config_1.default.DUMP_PROCESS_INTERVAL) // run every n hours
+        ;
+        delayTime = delayTimeHours * (60 * (60 * 1000));
+        (0, exports.dumpAndSendToTelegram)();
+        setInterval(exports.dumpAndSendToTelegram, delayTime);
+        return [2 /*return*/];
     });
 }); };
 var dumpAndSendToTelegram = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -116,7 +104,7 @@ var dumpAndSendToTelegram = function () { return __awaiter(void 0, void 0, void 
             case 0: return [4 /*yield*/, dumpWorks.start()];
             case 1:
                 dumpLog = _a.sent();
-                return [4 /*yield*/, telegram.logText("<pre>" + dumpLog.log + "</pre>")];
+                return [4 /*yield*/, telegram.logText("#" + telegram.botInfo.username + "\n\n<pre>" + dumpLog.log + "</pre>")];
             case 2:
                 _a.sent();
                 return [4 /*yield*/, telegram.logFile(dumpLog.archivePath)];

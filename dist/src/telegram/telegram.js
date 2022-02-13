@@ -58,7 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logFile = exports.logText = exports.onMessage = exports.init = void 0;
+exports.logFile = exports.logText = exports.onMessage = exports.init = exports.botInfo = exports.bot = void 0;
 var node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
 var download_1 = __importDefault(require("download"));
 var extract_zip_1 = __importDefault(require("extract-zip"));
@@ -70,16 +70,15 @@ var telegramBotReplies_config_1 = __importDefault(require("../configs/telegramBo
 var app_1 = require("../../app");
 var utils_1 = require("../utils/utils");
 var DOWNLOADED_PATH = 'downloaded';
-var bot = new node_telegram_bot_api_1.default(env_config_1.default.TELEGRAM_BOT_TOKEN, { polling: true });
+exports.bot = new node_telegram_bot_api_1.default(env_config_1.default.TELEGRAM_BOT_TOKEN, { polling: true });
 var init = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var botMe;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, bot.getMe()];
+            case 0: return [4 /*yield*/, exports.bot.getMe()];
             case 1:
-                botMe = _a.sent();
-                bot.on('message', exports.onMessage);
-                console.log("\u2705 Telegram bot @" + botMe.username + " initialized!");
+                exports.botInfo = _a.sent();
+                exports.bot.on('message', exports.onMessage);
+                console.log("\u2705 Telegram bot @" + exports.botInfo.username + " initialized!");
                 (0, exports.logText)(telegramBotReplies_config_1.default.other.bot_started);
                 return [2 /*return*/];
         }
@@ -101,10 +100,10 @@ var onMessage = function (msg) { return __awaiter(void 0, void 0, void 0, functi
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 6, , 7]);
-                bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_started);
+                exports.bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_started);
                 // delete previous backup
                 child.exec("rm -r " + DOWNLOADED_PATH);
-                return [4 /*yield*/, bot.getFile(msg.document.file_id)];
+                return [4 /*yield*/, exports.bot.getFile(msg.document.file_id)];
             case 2:
                 telegram_file = _b.sent();
                 telegram_url = "https://api.telegram.org/file/bot" + env_config_1.default.TELEGRAM_BOT_TOKEN + "/" + telegram_file.file_path;
@@ -121,12 +120,12 @@ var onMessage = function (msg) { return __awaiter(void 0, void 0, void 0, functi
             case 5:
                 // restore
                 _b.sent();
-                bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_success);
+                exports.bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_success);
                 return [3 /*break*/, 7];
             case 6:
                 err_1 = _b.sent();
-                bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_fail);
-                bot.sendMessage(msg.from.id, err_1.message);
+                exports.bot.sendMessage(msg.from.id, telegramBotReplies_config_1.default.restore.restore_fail);
+                exports.bot.sendMessage(msg.from.id, err_1.message);
                 return [3 /*break*/, 7];
             case 7: return [2 /*return*/];
         }
@@ -141,7 +140,7 @@ var logText = function (text) { return __awaiter(void 0, void 0, void 0, functio
                 options = {
                     parse_mode: "HTML",
                 };
-                return [4 /*yield*/, bot.sendMessage(env_config_1.default.TELEGRAM_CHAT_TO_LOG, text, options)];
+                return [4 /*yield*/, exports.bot.sendMessage(env_config_1.default.TELEGRAM_CHAT_TO_LOG, text, options)];
             case 1:
                 _a.sent();
                 return [2 /*return*/];
@@ -153,14 +152,14 @@ var logFile = function (path) { return __awaiter(void 0, void 0, void 0, functio
     var botMe, fileOptions;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, bot.getMe()];
+            case 0: return [4 /*yield*/, exports.bot.getMe()];
             case 1:
                 botMe = _a.sent();
                 fileOptions = {
                     filename: "Mongodump " + botMe.first_name + " " + (0, utils_1.getCurrentDateFormat)() + ".zip",
                     contentType: 'application/octet-stream',
                 };
-                return [4 /*yield*/, bot.sendDocument(env_config_1.default.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions)];
+                return [4 /*yield*/, exports.bot.sendDocument(env_config_1.default.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions)];
             case 2:
                 _a.sent();
                 return [2 /*return*/];

@@ -14,6 +14,8 @@ To restore just send to bot chat dump archieve
 3. Run `yarn` in the root folder
 4. Run `yarn start`
 
+Run `yarn build` to create js files
+
 ## Environment variables in `.env` file
 
 | Variable                     | Description                                                       |

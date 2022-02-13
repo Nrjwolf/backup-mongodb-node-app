@@ -148,22 +148,25 @@ var logText = function (text) { return __awaiter(void 0, void 0, void 0, functio
     });
 }); };
 exports.logText = logText;
-var logFile = function (path) { return __awaiter(void 0, void 0, void 0, function () {
-    var botMe, fileOptions;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, exports.bot.getMe()];
-            case 1:
-                botMe = _a.sent();
-                fileOptions = {
-                    filename: "Mongodump " + botMe.first_name + " " + (0, utils_1.getCurrentDateFormat)() + ".zip",
-                    contentType: 'application/octet-stream',
-                };
-                return [4 /*yield*/, exports.bot.sendDocument(env_config_1.default.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions)];
-            case 2:
-                _a.sent();
-                return [2 /*return*/];
-        }
+var logFile = function (path, caption) {
+    if (caption === void 0) { caption = ''; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var botMe, fileOptions;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, exports.bot.getMe()];
+                case 1:
+                    botMe = _a.sent();
+                    fileOptions = {
+                        filename: "Mongodump " + botMe.first_name + " " + (0, utils_1.getCurrentDateFormat)() + ".zip",
+                        contentType: 'application/octet-stream',
+                    };
+                    return [4 /*yield*/, exports.bot.sendDocument(env_config_1.default.TELEGRAM_CHAT_TO_LOG, path, { parse_mode: 'HTML', caption: caption }, fileOptions)];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
     });
-}); };
+};
 exports.logFile = logFile;

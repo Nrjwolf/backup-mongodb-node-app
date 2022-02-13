@@ -60,11 +60,11 @@ export const logText = async (text: string) => {
     await bot.sendMessage(envConfig.TELEGRAM_CHAT_TO_LOG, text, options)
 }
 
-export const logFile = async (path: string) => {
+export const logFile = async (path: string, caption: string = '') => {
     const botMe = await bot.getMe()
     const fileOptions = {
         filename: `Mongodump ${botMe.first_name} ${getCurrentDateFormat()}.zip`,
         contentType: 'application/octet-stream',
     }
-    await bot.sendDocument(envConfig.TELEGRAM_CHAT_TO_LOG, path, {}, fileOptions)
+    await bot.sendDocument(envConfig.TELEGRAM_CHAT_TO_LOG, path, { parse_mode: 'HTML', caption: caption }, fileOptions)
 }

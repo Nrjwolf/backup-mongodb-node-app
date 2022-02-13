@@ -98,20 +98,18 @@ var appProcess = function () { return __awaiter(void 0, void 0, void 0, function
     });
 }); };
 var dumpAndSendToTelegram = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var dumpLog;
+    var dumpLog, caption;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, dumpWorks.start()];
             case 1:
                 dumpLog = _a.sent();
-                return [4 /*yield*/, telegram.logText("#" + telegram.botInfo.username + "\n\n<pre>" + dumpLog.log + "</pre>")];
+                caption = "#" + telegram.botInfo.username + "\n\n<pre>" + dumpLog.log + "</pre>";
+                return [4 /*yield*/, telegram.logFile(dumpLog.archivePath, caption)];
             case 2:
                 _a.sent();
-                return [4 /*yield*/, telegram.logFile(dumpLog.archivePath)];
-            case 3:
-                _a.sent();
                 return [4 /*yield*/, telegram.logText(telegramBotReplies_config_1.default.other.next_dump_time.replace('{0}', env_config_1.default.DUMP_PROCESS_INTERVAL))];
-            case 4:
+            case 3:
                 _a.sent();
                 return [2 /*return*/];
         }

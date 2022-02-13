@@ -30,8 +30,8 @@ const appProcess = async () => {
 
 export const dumpAndSendToTelegram = async () => {
     const dumpLog = await dumpWorks.start()
-    await telegram.logText(`#${telegram.botInfo.username}\n\n<pre>${dumpLog.log}</pre>`)
-    await telegram.logFile(dumpLog.archivePath)
+    const caption = `#${telegram.botInfo.username}\n\n<pre>${dumpLog.log}</pre>`
+    await telegram.logFile(dumpLog.archivePath, caption)
     await telegram.logText(telegramBotRepliesConfig.other.next_dump_time.replace('{0}', envConfig.DUMP_PROCESS_INTERVAL))
 }
 

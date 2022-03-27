@@ -54,31 +54,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-require('./utils/colorsLog');
-var telegram = __importStar(require("./telegram/telegram"));
-var enpoints = __importStar(require("./endpoints"));
-var init = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_1;
+exports.dumpAndSendToTelegram = void 0;
+var env_1 = require("../configs/env");
+var dumpWorks = __importStar(require("../exec/dumpWorks"));
+var telegram = __importStar(require("../telegram/telegram"));
+var telegramBotReplies_config_1 = __importDefault(require("../configs/telegramBotReplies.config"));
+var dumpAndSendToTelegram = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var dumpLog, caption;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 3, , 4]);
-                console.log("\u231B\uFE0F " + require('../package.json').name + " started...");
-                return [4 /*yield*/, enpoints.init()];
+            case 0: return [4 /*yield*/, dumpWorks.start()];
             case 1:
-                _a.sent();
-                return [4 /*yield*/, telegram.init()];
+                dumpLog = _a.sent();
+                caption = "#" + telegram.botInfo.username + "\n\n<pre>" + dumpLog.log + "</pre>";
+                return [4 /*yield*/, telegram.logFile(dumpLog.archivePath, caption)];
             case 2:
                 _a.sent();
-                console.log("\u2705\u2705\u2705 Initialization COMPLETE!".green());
-                return [3 /*break*/, 4];
+                return [4 /*yield*/, telegram.logText(telegramBotReplies_config_1.default.other.next_dump_time.replace('{0}', env_1.ENV.DUMP_PROCESS_INTERVAL))];
             case 3:
-                err_1 = _a.sent();
-                console.log("\u274C\u274C\u274C Initialization FAILED!".red());
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
+                _a.sent();
+                return [2 /*return*/];
         }
     });
 }); };
-init();
+exports.dumpAndSendToTelegram = dumpAndSendToTelegram;

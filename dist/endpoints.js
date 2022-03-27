@@ -54,31 +54,55 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-require('./utils/colorsLog');
-var telegram = __importStar(require("./telegram/telegram"));
-var enpoints = __importStar(require("./endpoints"));
+exports.init = void 0;
+var express_1 = __importDefault(require("express"));
+var appProcesses = __importStar(require("./appProcesses/appProcesses"));
+var env_1 = require("./configs/env");
+var app = (0, express_1.default)();
+app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({
+    extended: true
+}));
+var isDumping = false;
+var getBearerToken = function (auth) {
+    var PREFIX = "Bearer ";
+    if (!auth || !auth.toLowerCase().startsWith(PREFIX.toLowerCase()))
+        return undefined;
+    var token = auth.substring(PREFIX.length);
+    return token;
+};
 var init = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_1;
+    var port;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 3, , 4]);
-                console.log("\u231B\uFE0F " + require('../package.json').name + " started...");
-                return [4 /*yield*/, enpoints.init()];
-            case 1:
-                _a.sent();
-                return [4 /*yield*/, telegram.init()];
-            case 2:
-                _a.sent();
-                console.log("\u2705\u2705\u2705 Initialization COMPLETE!".green());
-                return [3 /*break*/, 4];
-            case 3:
-                err_1 = _a.sent();
-                console.log("\u274C\u274C\u274C Initialization FAILED!".red());
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
-        }
+        port = 7001;
+        app.listen(port, function () { return console.log("\uD83D\uDE80 Server running on port " + port); });
+        app.get('/v', function (req, res) {
+            res.json({
+                name: require('../package.json').name,
+                v: require('../package.json').version
+            });
+        });
+        /**
+         * Делает дамп, отправляет в телегу
+         */
+        app.post('/dump', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+            var apiKey;
+            return __generator(this, function (_a) {
+                apiKey = getBearerToken(req.headers.authorization);
+                if (apiKey != env_1.ENV.API_KEY)
+                    return [2 /*return*/, res.sendStatus(401)];
+                if (!isDumping) {
+                    isDumping = true;
+                    appProcesses.dumpAndSendToTelegram();
+                }
+                return [2 /*return*/, res.status(200).send('Ok')];
+            });
+        }); });
+        return [2 /*return*/];
     });
 }); };
-init();
+exports.init = init;

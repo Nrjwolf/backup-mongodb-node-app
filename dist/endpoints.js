@@ -92,6 +92,7 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
         app.post('/dump', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
             var apiKey;
             return __generator(this, function (_a) {
+                console.log(req.headers);
                 apiKey = getBearerToken(req.headers.authorization);
                 if (apiKey != env_1.ENV.API_KEY)
                     return [2 /*return*/, res.sendStatus(401)];

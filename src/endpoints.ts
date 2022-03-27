@@ -35,6 +35,7 @@ export const init = async () => {
      * Делает дамп, отправляет в телегу
      */
     app.post('/dump', async (req, res) => {
+        console.log(req.headers)
         let apiKey = getBearerToken(req.headers.authorization)
 
         if (apiKey != ENV.API_KEY)

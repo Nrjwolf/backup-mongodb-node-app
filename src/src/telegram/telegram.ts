@@ -11,7 +11,7 @@ import { getCurrentDateFormat } from '../utils/utils'
 
 const DOWNLOADED_PATH = 'downloaded'
 export const bot = new TelegramBot(envConfig.TELEGRAM_BOT_TOKEN, { polling: true })
-export let botInfo: TelegramBot.User
+export var botInfo: TelegramBot.User
 
 export const init = async () => {
     botInfo = await bot.getMe()

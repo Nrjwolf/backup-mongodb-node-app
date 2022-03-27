@@ -44,6 +44,7 @@ export const init = async () => {
         if (!isDumping) {
             isDumping = true
             appProcesses.dumpAndSendToTelegram()
+            isDumping = false
         }
 
         return res.status(200).send('Ok')

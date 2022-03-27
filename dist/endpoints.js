@@ -99,6 +99,7 @@ var init = function () { return __awaiter(void 0, void 0, void 0, function () {
                 if (!isDumping) {
                     isDumping = true;
                     appProcesses.dumpAndSendToTelegram();
+                    isDumping = false;
                 }
                 return [2 /*return*/, res.status(200).send('Ok')];
             });

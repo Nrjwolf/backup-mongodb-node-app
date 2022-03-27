@@ -3,7 +3,6 @@ import fastFolderSize from 'fast-folder-size'
 import * as fs from 'fs'
 import { zip } from 'zip-a-folder'
 
-import envConfig from '../configs/env.config'
 import { niceBytes } from '../utils/niceBytes'
 
 const BACKUP_PATH = 'dump'

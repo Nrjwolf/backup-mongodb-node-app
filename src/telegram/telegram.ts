@@ -1,16 +1,16 @@
+import { ENV } from '../configs/env'
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import download from 'download'
 import extract from 'extract-zip'
 import * as child from 'child_process'
-import envConfig from '../configs/env.config'
 import path from 'path'
 import { mongorestore } from '../exec/dumpWorks'
 import telegramBotRepliesConfig from '../configs/telegramBotReplies.config'
-import { dumpAndSendToTelegram } from '../../app'
 import { getCurrentDateFormat } from '../utils/utils'
+import * as appProcesses from '../appProcesses/appProcesses'
 
 const DOWNLOADED_PATH = 'downloaded'
-export const bot = new TelegramBot(envConfig.TELEGRAM_BOT_TOKEN, { polling: true })
+export const bot = new TelegramBot(ENV.TELEGRAM_BOT_TOKEN, { polling: true })
 export var botInfo: TelegramBot.User
 
 export const init = async () => {
@@ -21,10 +21,10 @@ export const init = async () => {
 }
 
 export const onMessage = async (msg: Message) => {
-    if (msg.from?.id.toString() != envConfig.ADMIN_TELEGRAM_ID) return
+    if (msg.from?.id.toString() != ENV.ADMIN_TELEGRAM_ID) return
 
     if (msg.text == '/start') {
-        dumpAndSendToTelegram()
+        appProcesses.dumpAndSendToTelegram()
     }
 
     // Here is restoring process with recieved dump
@@ -37,7 +37,7 @@ export const onMessage = async (msg: Message) => {
 
             // download and unzip recieved dump
             const telegram_file = await bot.getFile(msg.document.file_id)
-            const telegram_url = `https://api.telegram.org/file/bot${envConfig.TELEGRAM_BOT_TOKEN}/${telegram_file.file_path}`
+            const telegram_url = `https://api.telegram.org/file/bot${ENV.TELEGRAM_BOT_TOKEN}/${telegram_file.file_path}`
             await download(telegram_url, DOWNLOADED_PATH)
             await extract(`${DOWNLOADED_PATH}/${path.basename(telegram_file.file_path!)}`, { dir: `${process.cwd()}/${DOWNLOADED_PATH}` })
 
@@ -57,7 +57,7 @@ export const logText = async (text: string) => {
     const options: TelegramBot.SendMessageOptions = {
         parse_mode: "HTML",
     }
-    await bot.sendMessage(envConfig.TELEGRAM_CHAT_TO_LOG, text, options)
+    await bot.sendMessage(ENV.TELEGRAM_CHAT_TO_LOG, text, options)
 }
 
 export const logFile = async (path: string, caption: string = '') => {
@@ -66,5 +66,5 @@ export const logFile = async (path: string, caption: string = '') => {
         filename: `Mongodump ${botMe.first_name} ${getCurrentDateFormat()}.zip`,
         contentType: 'application/octet-stream',
     }
-    await bot.sendDocument(envConfig.TELEGRAM_CHAT_TO_LOG, path, { parse_mode: 'HTML', caption: caption }, fileOptions)
+    await bot.sendDocument(ENV.TELEGRAM_CHAT_TO_LOG, path, { parse_mode: 'HTML', caption: caption }, fileOptions)
 }

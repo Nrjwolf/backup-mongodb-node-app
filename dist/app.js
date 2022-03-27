@@ -104,7 +104,7 @@ var dumpAndSendToTelegram = function () { return __awaiter(void 0, void 0, void 
             case 0: return [4 /*yield*/, dumpWorks.start()];
             case 1:
                 dumpLog = _a.sent();
-                caption = "#" + telegram.botInfo.last_name + "\n\n<pre>" + dumpLog.log + "</pre>";
+                caption = "#" + telegram.botInfo.username + "\n\n<pre>" + dumpLog.log + "</pre>";
                 return [4 /*yield*/, telegram.logFile(dumpLog.archivePath, caption)];
             case 2:
                 _a.sent();

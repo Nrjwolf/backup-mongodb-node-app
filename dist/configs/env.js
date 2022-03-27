@@ -30,7 +30,6 @@ var EnvConfig = rt.Record({
     TELEGRAM_BOT_TOKEN: rt.String,
     TELEGRAM_CHAT_TO_LOG: rt.String,
     ADMIN_TELEGRAM_ID: rt.String,
-    DUMP_PROCESS_INTERVAL: rt.String,
     API_KEY: rt.String,
 });
 exports.ENV = EnvConfig.check(process.env);

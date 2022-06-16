@@ -14,8 +14,6 @@ To restore just send to bot chat dump archieve
 3. Run `yarn` in the root folder
 4. Run `yarn start`
 
-Run `yarn build` to create js files
-
 ## Environment variables in `.env` file
 
 | Variable                     | Description                                                       |
@@ -23,7 +21,6 @@ Run `yarn build` to create js files
 | `TELEGRAM_BOT_TOKEN`         | Telegram bot token (use @BotFather)                               |
 | `TELEGRAM_CHAT_TO_LOG`       | ID of log chat, you can find it with @userinfobot                 |
 | `ADMIN_TELEGRAM_ID`          | Your admin id (via @userinfobot), only this user can controll bot |
-| `DUMP_PROCESS_INTERVAL`      | Time in hours, how often you need to make dump                    |
 
 ## License
 

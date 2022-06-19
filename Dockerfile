@@ -13,6 +13,7 @@ EXPOSE 3000
 
 RUN apt-get update && apt-get install -y apt-transport-https
 RUN apt-get install gnupg
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
 
 RUN chown -R node /usr/src/app
 USER node

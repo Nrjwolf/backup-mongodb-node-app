@@ -12,7 +12,7 @@ const BACKUP_PATH = 'dump'
  * @returns Collections export log
  */
 export const start = async (options: string = ''): Promise<DumpResult> => {
-    return await new Promise(async function (resolve, reject) {
+    return new Promise(async function (resolve, reject) {
         try {
             let result = {
                 log: '',
@@ -36,14 +36,18 @@ export const start = async (options: string = ''): Promise<DumpResult> => {
 
             // create zip archive
             const archivePath = `${BACKUP_PATH}.zip`
-            await zip(BACKUP_PATH, archivePath)
+            if (fs.existsSync(BACKUP_PATH)) {
+                await zip(BACKUP_PATH, archivePath)
 
-            result.log += `\nZip archive ~ ${getFileSize(archivePath)}`
-            result.archivePath = archivePath
+                result.log += `\nZip archive ~ ${getFileSize(archivePath)}`
+                result.archivePath = archivePath
 
-            resolve(result)
-            console.log(result.log)
-
+                resolve(result)
+                console.log(result.log)
+            }
+            else {
+                throw new Error(`${archivePath} does not exist!`)
+            }
         }
         catch (error) {
             console.error(error)
@@ -58,9 +62,14 @@ export const mongorestore = async (dir: string): Promise<string> => {
 }
 
 export const getDirectories = async (path: string): Promise<string[]> => {
-    return fs.readdirSync(path).filter(function (file) {
-        return fs.statSync(path + '/' + file).isDirectory()
-    })
+    try {
+        return fs.readdirSync(path).filter(function (file) {
+            return fs.statSync(path + '/' + file).isDirectory()
+        })
+    }
+    catch (err) {
+        return []
+    }
 }
 
 const execAsync = async (command: string): Promise<string> => {

@@ -55,6 +55,7 @@ export const init = async () => {
                 res.status(200).send('Ok')
             }
             catch (err) {
+                isDumping = false
                 if (err instanceof Error)
                     res.status(409).send(`${err.name} — ${err.message}`)
             }

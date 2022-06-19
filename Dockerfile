@@ -19,7 +19,6 @@ RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/5.0 main" | 
 RUN apt-get update
 RUN apt-get install -y mongodb-org
 RUN mongo --version
-RUN mongodump
 
 RUN chown -R node /usr/src/app
 USER node

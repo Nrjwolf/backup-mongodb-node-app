@@ -14,6 +14,11 @@ To restore just send to bot chat dump archieve
 3. Run `yarn` in the root folder
 4. Run `yarn start`
 
+## Endpoints
+
+**post**  
+`/dump` — calls `mongodump`, you can also put `options` in body
+
 ## Environment variables in `.env` file
 
 | Variable                     | Description                                                       |
@@ -21,6 +26,7 @@ To restore just send to bot chat dump archieve
 | `TELEGRAM_BOT_TOKEN`         | Telegram bot token (use @BotFather)                               |
 | `TELEGRAM_CHAT_TO_LOG`       | ID of log chat, you can find it with @userinfobot                 |
 | `ADMIN_TELEGRAM_ID`          | Your admin id (via @userinfobot), only this user can controll bot |
+| `API_KEY`                    | Bearer token for endpoints use                                    |
 
 ## License
 

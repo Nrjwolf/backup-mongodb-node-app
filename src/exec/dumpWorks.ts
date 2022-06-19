@@ -11,7 +11,7 @@ const BACKUP_PATH = 'dump'
  * 
  * @returns Collections export log
  */
-export const start = async (): Promise<DumpResult> => {
+export const start = async (options: string = ''): Promise<DumpResult> => {
     return await new Promise(async function (resolve, reject) {
         try {
             let result = {
@@ -20,11 +20,14 @@ export const start = async (): Promise<DumpResult> => {
             }
 
             await execAsync(`rm -r ${BACKUP_PATH}`) // delete previous backup
-            await execAsync(`mongodump`) // create dump
+            if (options.length > 0)
+                await execAsync(`mongodump ${options}`) // create dump
+            else
+                await execAsync(`mongodump`)
 
             // log sizes
             const allDirectories = await getDirectories(BACKUP_PATH)
-            for (let i = 0; i < allDirectories.length; i++) {
+            for (let i = 0;i < allDirectories.length;i++) {
                 const dir = allDirectories[i]
                 const fullDir = `${BACKUP_PATH}/${dir}`
                 const size = await getFolderSize(fullDir)
@@ -40,6 +43,7 @@ export const start = async (): Promise<DumpResult> => {
 
             resolve(result)
             console.log(result.log)
+
         }
         catch (error) {
             console.error(error)

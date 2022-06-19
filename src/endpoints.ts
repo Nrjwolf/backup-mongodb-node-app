@@ -1,4 +1,5 @@
-import express from 'express'
+import express, { Request, Response } from 'express'
+import { body, query, validationResult } from 'express-validator'
 
 import * as appProcesses from './appProcesses/appProcesses'
 import { ENV } from './configs/env'
@@ -34,20 +35,29 @@ export const init = async () => {
     /**
      * Делает дамп, отправляет в телегу
      */
-    app.post('/dump', async (req, res) => {
-        console.log(req.headers)
-        let apiKey = getBearerToken(req.headers.authorization)
+    app.post('/dump',
+        [
+            body('options').optional().notEmpty()
+        ],
+        async (req: Request, res: Response) => {
+            let apiKey = getBearerToken(req.headers.authorization)
 
-        if (apiKey != ENV.API_KEY)
-            return res.sendStatus(401)
+            if (apiKey != ENV.API_KEY)
+                return res.sendStatus(401)
 
-        if (!isDumping) {
-            isDumping = true
-            appProcesses.dumpAndSendToTelegram()
-            isDumping = false
-        }
-
-        return res.status(200).send('Ok')
-    })
+            const options = req.body.options
+            try {
+                if (!isDumping) {
+                    isDumping = true
+                    await appProcesses.dumpAndSendToTelegram(options)
+                    isDumping = false
+                }
+                res.status(200).send('Ok')
+            }
+            catch (err) {
+                if (err instanceof Error)
+                    res.status(409).send(`${err.name} — ${err.message}`)
+            }
+        })
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "backup-db-app",
-  "version": "1.0.21",
+  "version": "1.0.23",
   "main": "app.js",
   "author": "nrjwolf <nrjwolf@gmail.com>",
   "license": "MIT",

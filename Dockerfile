@@ -5,8 +5,9 @@ WORKDIR /usr/src/app
 COPY package.json ./
 COPY yarn.lock ./
 
-ENV NODE_ENV=production
-RUN yarn --prod
+RUN npm install pm2 --location=global
+RUN npm install --location=global typescript
+RUN yarn
 COPY . .
 
 EXPOSE 3000
@@ -23,4 +24,5 @@ RUN mongo --version
 RUN chown -R node /usr/src/app
 USER node
 
-CMD ["yarn", "start"]
+RUN tsc
+CMD pm2-runtime "dist/app.js"

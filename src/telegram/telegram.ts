@@ -42,7 +42,8 @@ export const onMessage = async (msg: Message) => {
             await extract(`${DOWNLOADED_PATH}/${path.basename(telegram_file.file_path!)}`, { dir: `${process.cwd()}/${DOWNLOADED_PATH}` })
 
             // restore
-            await mongorestore(`${DOWNLOADED_PATH}`)
+            console.log(msg.caption)
+            await mongorestore(`${DOWNLOADED_PATH}`, msg.caption ?? '')
 
             bot.sendMessage(msg.from.id, telegramBotRepliesConfig.restore.restore_success)
         }

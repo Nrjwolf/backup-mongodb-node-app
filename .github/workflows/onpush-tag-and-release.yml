@@ -1,0 +1,52 @@
+name: Create Tag
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.2.0
+        with:
+          fetch-depth: 0
+
+      - name: setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+
+      - name: Get Previous tag
+        id: previoustag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+
+      - name: package-version
+        run: node -p -e '`PACKAGE_VERSION=v${require("./package.json").version}`' >> $GITHUB_ENV
+
+      - name: Tag changed
+        if: steps.previoustag.outputs.tag != env.PACKAGE_VERSION
+        run: echo new tag ${{ steps.previoustag.outputs.tag }} => ${{ env.PACKAGE_VERSION }}
+
+      - name: Set new tag
+        uses: pkgdeps/git-tag-action@v2
+        if: steps.previoustag.outputs.tag != env.PACKAGE_VERSION
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_repo: ${{ github.repository }}
+          git_commit_sha: ${{ github.sha }}
+          version: ${{ env.PACKAGE_VERSION }}
+
+      - name: Merge to release
+        if: steps.previoustag.outputs.tag != env.PACKAGE_VERSION
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          target_branch: release
+          github_token: ${{ github.token }}
+
+      - name: Tag not changed
+        if: steps.previoustag.outputs.tag == env.PACKAGE_VERSION
+        run: echo tag not changed ${{ steps.previoustag.outputs.tag }} => ${{ env.PACKAGE_VERSION }}

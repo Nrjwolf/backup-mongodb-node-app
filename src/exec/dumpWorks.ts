@@ -57,8 +57,8 @@ export const start = async (options: string = ''): Promise<DumpResult> => {
 
 }
 
-export const mongorestore = async (dir: string): Promise<string> => {
-    return await execAsync(`mongorestore ${dir}`)
+export const mongorestore = async (dir: string, options:string): Promise<string> => {
+    return await execAsync(`mongorestore ${dir} ${options}`)
 }
 
 export const getDirectories = async (path: string): Promise<string[]> => {

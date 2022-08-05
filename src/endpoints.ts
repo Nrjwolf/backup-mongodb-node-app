@@ -33,7 +33,7 @@ export const init = async () => {
     })
 
     /**
-     * Делает дамп, отправляет в телегу
+     * Make a dump of the database and send it to the telegram chat
      */
     app.post('/dump',
         [

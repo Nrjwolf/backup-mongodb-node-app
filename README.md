@@ -4,8 +4,10 @@ Telegram bot creates **MongoDB** dump by executing command `mongodump` and sends
 
 ## Usage
 
-`/start` — force create dump  
-To restore just send to bot chat dump archieve
+`/start` — force create dump with local db  
+To restore just send to chat with bot the dump archieve, also you can send it with options in caption
+
+![Group](https://user-images.githubusercontent.com/10683971/183007764-8ca10af9-9194-46c7-bf5a-1bd031557ad1.png)
 
 ## Installation and local launch
 
@@ -26,8 +28,8 @@ To restore just send to bot chat dump archieve
 | `TELEGRAM_BOT_TOKEN`         | Telegram bot token (use @BotFather)                               |
 | `TELEGRAM_CHAT_TO_LOG`       | ID of log chat, you can find it with @userinfobot                 |
 | `ADMIN_TELEGRAM_ID`          | Your admin id (via @userinfobot), only this user can controll bot |
-| `API_KEY`                    | Bearer token for endpoints use                                    |
+| `API_KEY`                    | Bearer token for endpoints usage                                  |
 
 ## License
 
-MIT — use for any purpose. Would be great if you could leave a note about the original developers. Thanks!
+MIT — use for any purpose. Thanks!

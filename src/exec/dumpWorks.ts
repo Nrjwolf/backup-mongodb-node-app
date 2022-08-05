@@ -2,8 +2,12 @@ import * as child from 'child_process'
 import fastFolderSize from 'fast-folder-size'
 import * as fs from 'fs'
 import { zip } from 'zip-a-folder'
-
 import { niceBytes } from '../utils/niceBytes'
+
+export type DumpResult = {
+    log: string,
+    archivePath: string,
+}
 
 const BACKUP_PATH = 'dump'
 
@@ -20,10 +24,13 @@ export const start = async (options: string = ''): Promise<DumpResult> => {
             }
 
             await execAsync(`rm -r ${BACKUP_PATH}`) // delete previous backup
-            if (options.length > 0)
+            if (options.length > 0) {
+                console.log(`mongodump ${options}`)
                 await execAsync(`mongodump ${options}`) // create dump
-            else
+            }
+            else {
                 await execAsync(`mongodump`)
+            }
 
             // log sizes
             const allDirectories = await getDirectories(BACKUP_PATH)
@@ -57,10 +64,21 @@ export const start = async (options: string = ''): Promise<DumpResult> => {
 
 }
 
-export const mongorestore = async (dir: string, options:string): Promise<string> => {
+/**
+ * Executes a shell command 'mongorestore'
+ * @param dir local path of dump folder
+ * @param options string of options for mongorestore
+ * @returns 
+ */
+export const mongorestore = async (dir: string, options: string): Promise<string> => {
     return await execAsync(`mongorestore ${dir} ${options}`)
 }
 
+/**
+ * Returns an array of all directories in a folder
+ * @param path local path of folder
+ * @returns 
+ */
 export const getDirectories = async (path: string): Promise<string[]> => {
     try {
         return fs.readdirSync(path).filter(function (file) {
@@ -72,6 +90,11 @@ export const getDirectories = async (path: string): Promise<string[]> => {
     }
 }
 
+/**
+ * Executes a shell command in async mode
+ * @param command 
+ * @returns 
+ */
 const execAsync = async (command: string): Promise<string> => {
     return await new Promise(function (resolve, reject) {
         try {
@@ -86,11 +109,21 @@ const execAsync = async (command: string): Promise<string> => {
     })
 }
 
+/**
+ * Returns the size of a file in nice format (e.g. 1.5 MB)
+ * @param path 
+ * @returns 
+ */
 const getFileSize = (path: string) => {
     const stats = fs.statSync(path)
     return niceBytes(stats.size)
 }
 
+/**
+ * Returns the size of a folder in nice format (e.g. 1.5 MB)
+ * @param path 
+ * @returns 
+ */
 const getFolderSize = async (path: string) => {
     return await new Promise(function (resolve, reject) {
         try {
@@ -107,9 +140,4 @@ const getFolderSize = async (path: string) => {
         }
     })
 
-}
-
-export type DumpResult = {
-    log: string,
-    archivePath: string,
 }
